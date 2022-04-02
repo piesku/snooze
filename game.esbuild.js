@@ -1,9 +1,4 @@
 (() => {
-  // ../common/input.ts
-  function input_pointer_lock(game2) {
-    game2.Ui.addEventListener("click", () => game2.Ui.requestPointerLock());
-  }
-
   // ../common/webgl.ts
   var GL_DEPTH_BUFFER_BIT = 256;
   var GL_COLOR_BUFFER_BIT = 16384;
@@ -13,7 +8,6 @@
   var GL_SRC_ALPHA = 770;
   var GL_ONE_MINUS_SRC_ALPHA = 771;
   var GL_STATIC_DRAW = 35044;
-  var GL_DYNAMIC_DRAW = 35048;
   var GL_ARRAY_BUFFER = 34962;
   var GL_ELEMENT_ARRAY_BUFFER = 34963;
   var GL_CULL_FACE = 2884;
@@ -231,9 +225,9 @@
       for (let name in this.InputDelta) {
         this.InputDelta[name] = 0;
       }
-      let update21 = performance.now() - this.Now;
+      let update20 = performance.now() - this.Now;
       if (update_span) {
-        update_span.textContent = update21.toFixed(1);
+        update_span.textContent = update20.toFixed(1);
       }
       if (delta_span) {
         delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -1933,7 +1927,7 @@
   function update5(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
-    if (control.Move) {
+    if (control.Jump) {
       if (game2.InputState["Space"]) {
         if (!rigid_body2.IsAirborne) {
           rigid_body2.Acceleration[1] += 300;
@@ -1956,21 +1950,6 @@
   }
   function update6(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
-    if (control.Move) {
-      let move2 = game2.World.Move[entity];
-      if (game2.InputState["KeyW"]) {
-        move2.Direction[2] += 1;
-      }
-      if (game2.InputState["KeyA"]) {
-        move2.Direction[0] += 1;
-      }
-      if (game2.InputState["KeyS"]) {
-        move2.Direction[2] -= 1;
-      }
-      if (game2.InputState["KeyD"]) {
-        move2.Direction[0] -= 1;
-      }
-    }
     if (control.Yaw) {
       let move2 = game2.World.Move[entity];
       if (game2.InputState["ArrowLeft"]) {
@@ -1993,76 +1972,32 @@
     }
   }
 
-  // ../src/systems/sys_control_mouse_move.ts
-  var QUERY9 = 4194304 /* Transform */ | 16384 /* Move */ | 128 /* ControlPlayer */;
-  var AXIS_X = [1, 0, 0];
-  var AXIS_Y = [0, 1, 0];
-  function sys_control_mouse_move(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
-        update7(game2, i);
-      }
-    }
-  }
-  var rotation = [0, 0, 0, 0];
-  function update7(game2, entity) {
-    let control = game2.World.ControlPlayer[entity];
-    let transform2 = game2.World.Transform[entity];
-    if (control.Yaw && game2.InputDelta.MouseX) {
-      let amount = game2.InputDelta.MouseX * control.Yaw * DEG_TO_RAD;
-      from_axis(rotation, AXIS_Y, -amount);
-      multiply(transform2.Rotation, rotation, transform2.Rotation);
-      game2.World.Signature[entity] |= 256 /* Dirty */;
-    }
-    if (control.Pitch && game2.InputDelta.MouseY) {
-      let current_pitch = get_pitch(transform2.Rotation);
-      let min_amount = control.MinPitch - current_pitch;
-      let max_amount = control.MaxPitch - current_pitch;
-      let amount = clamp(min_amount, max_amount, game2.InputDelta.MouseY * control.Pitch);
-      from_axis(rotation, AXIS_X, amount * DEG_TO_RAD);
-      multiply(transform2.Rotation, transform2.Rotation, rotation);
-      game2.World.Signature[entity] |= 256 /* Dirty */;
-    }
-  }
-
   // ../src/systems/sys_control_touch_move.ts
-  var QUERY10 = 16384 /* Move */ | 128 /* ControlPlayer */;
-  var AXIS_Y2 = [0, 1, 0];
-  var AXIS_X2 = [1, 0, 0];
-  var DEAD_ZONE = 0.01;
+  var QUERY9 = 16384 /* Move */ | 128 /* ControlPlayer */;
+  var AXIS_Y = [0, 1, 0];
+  var AXIS_X = [1, 0, 0];
   var TOUCH_SENSITIVITY = 10;
   var joystick = [0, 0];
-  var rotation2 = [0, 0, 0, 0];
+  var rotation = [0, 0, 0, 0];
   function sys_control_touch_move(game2, delta) {
     if (game2.InputDelta["Touch0"] === 1) {
       joystick[0] = game2.InputState["Touch0X"];
       joystick[1] = game2.InputState["Touch0Y"];
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
-        update8(game2, i);
+      if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
+        update7(game2, i);
       }
     }
   }
-  function update8(game2, entity) {
+  function update7(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let control = game2.World.ControlPlayer[entity];
     let move2 = game2.World.Move[entity];
-    if (control.Move && game2.InputState["Touch0"] === 1) {
-      let divisor = Math.min(game2.ViewportWidth, game2.ViewportHeight) / 4;
-      let amount_x = (game2.InputState["Touch0X"] - joystick[0]) / divisor;
-      let amount_y = (game2.InputState["Touch0Y"] - joystick[1]) / divisor;
-      if (Math.abs(amount_x) > DEAD_ZONE) {
-        move2.Direction[0] += clamp(-1, 1, -amount_x);
-      }
-      if (Math.abs(amount_y) > DEAD_ZONE) {
-        move2.Direction[2] += clamp(-1, 1, -amount_y);
-      }
-    }
     if (control.Yaw && game2.InputDelta["Touch1X"]) {
       let amount = game2.InputDelta["Touch1X"] * control.Yaw * TOUCH_SENSITIVITY * DEG_TO_RAD;
-      from_axis(rotation2, AXIS_Y2, -amount);
-      multiply(transform2.Rotation, rotation2, transform2.Rotation);
+      from_axis(rotation, AXIS_Y, -amount);
+      multiply(transform2.Rotation, rotation, transform2.Rotation);
       game2.World.Signature[entity] |= 256 /* Dirty */;
     }
     if (control.Pitch && game2.InputDelta["Touch1Y"]) {
@@ -2070,17 +2005,17 @@
       let min_amount = control.MinPitch - current_pitch;
       let max_amount = control.MaxPitch - current_pitch;
       let amount = clamp(min_amount, max_amount, game2.InputDelta["Touch1Y"] * control.Pitch * TOUCH_SENSITIVITY);
-      from_axis(rotation2, AXIS_X2, amount * DEG_TO_RAD);
-      multiply(transform2.Rotation, transform2.Rotation, rotation2);
+      from_axis(rotation, AXIS_X, amount * DEG_TO_RAD);
+      multiply(transform2.Rotation, transform2.Rotation, rotation);
       game2.World.Signature[entity] |= 256 /* Dirty */;
     }
   }
 
   // ../src/systems/sys_control_xbox.ts
-  var QUERY11 = 16384 /* Move */ | 128 /* ControlPlayer */;
-  var AXIS_Y3 = [0, 1, 0];
-  var AXIS_X3 = [1, 0, 0];
-  var DEAD_ZONE2 = 0.1;
+  var QUERY10 = 16384 /* Move */ | 128 /* ControlPlayer */;
+  var AXIS_Y2 = [0, 1, 0];
+  var AXIS_X2 = [1, 0, 0];
+  var DEAD_ZONE = 0.1;
   function sys_control_xbox(game2, delta) {
     for (let pad of navigator.getGamepads()) {
       if (pad) {
@@ -2091,34 +2026,25 @@
       }
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY11) === QUERY11) {
-        update9(game2, i);
+      if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
+        update8(game2, i);
       }
     }
   }
-  function update9(game2, entity) {
+  function update8(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
-    if (control.Move) {
-      let move2 = game2.World.Move[entity];
-      if (Math.abs(game2.InputDelta["pad0_axis_1"]) > DEAD_ZONE2) {
-        move2.Direction[0] -= game2.InputDelta["pad0_axis_1"];
-      }
-      if (Math.abs(game2.InputDelta["pad0_axis_2"]) > DEAD_ZONE2) {
-        move2.Direction[2] -= game2.InputDelta["pad0_axis_2"];
-      }
-    }
-    if (control.Yaw && Math.abs(game2.InputDelta["pad0_axis_3"]) > DEAD_ZONE2) {
+    if (control.Yaw && Math.abs(game2.InputDelta["pad0_axis_3"]) > DEAD_ZONE) {
       let move2 = game2.World.Move[entity];
       let amount = game2.InputDelta["pad0_axis_3"] * Math.PI;
-      multiply(move2.LocalRotation, move2.LocalRotation, from_axis([0, 0, 0, 1], AXIS_Y3, -amount));
+      multiply(move2.LocalRotation, move2.LocalRotation, from_axis([0, 0, 0, 1], AXIS_Y2, -amount));
     }
-    if (control.Pitch && Math.abs(game2.InputDelta["pad0_axis_4"]) > DEAD_ZONE2) {
+    if (control.Pitch && Math.abs(game2.InputDelta["pad0_axis_4"]) > DEAD_ZONE) {
       let transform2 = game2.World.Transform[entity];
       let move2 = game2.World.Move[entity];
       let amount = game2.InputDelta["pad0_axis_4"] * Math.PI;
       let current_pitch = get_pitch(transform2.Rotation);
       if (amount < 0 && current_pitch > control.MinPitch || amount > 0 && current_pitch < control.MaxPitch) {
-        multiply(move2.SelfRotation, move2.SelfRotation, from_axis([0, 0, 0, 1], AXIS_X3, amount));
+        multiply(move2.SelfRotation, move2.SelfRotation, from_axis([0, 0, 0, 1], AXIS_X2, amount));
       }
     }
   }
@@ -2140,35 +2066,16 @@
     };
   }
   var FLOATS_PER_PARTICLE = 8;
-  var MAX_PARTICLES = 200;
-  function render_particles_colored(material, start_color, start_size, end_color, end_size) {
-    return (game2, entity) => {
-      let buffer = game2.Gl.createBuffer();
-      game2.Gl.bindBuffer(GL_ARRAY_BUFFER, buffer);
-      game2.Gl.bufferData(GL_ARRAY_BUFFER, MAX_PARTICLES * FLOATS_PER_PARTICLE * 4, GL_DYNAMIC_DRAW);
-      game2.World.Signature[entity] |= 65536 /* Render */;
-      game2.World.Render[entity] = {
-        Kind: 8 /* ParticlesColored */,
-        Material: material,
-        Phase: start_color[3] < 1 || end_color[3] < 1 ? 1 /* Transparent */ : 0 /* Opaque */,
-        Buffer: buffer,
-        ColorStart: start_color,
-        ColorEnd: end_color,
-        Size: [start_size, end_size],
-        FrontFace: GL_CW
-      };
-    };
-  }
 
   // ../src/components/com_transform.ts
-  function transform(translation = [0, 0, 0], rotation3 = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
+  function transform(translation = [0, 0, 0], rotation2 = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
     return (game2, entity) => {
       game2.World.Signature[entity] |= 4194304 /* Transform */ | 256 /* Dirty */;
       game2.World.Transform[entity] = {
         World: create(),
         Self: create(),
         Translation: translation,
-        Rotation: rotation3,
+        Rotation: rotation2,
         Scale: scale2,
         Gyroscope: false
       };
@@ -2176,7 +2083,7 @@
   }
 
   // ../src/systems/sys_draw.ts
-  var QUERY12 = 4194304 /* Transform */ | 512 /* Draw */;
+  var QUERY11 = 4194304 /* Transform */ | 512 /* Draw */;
   function sys_draw(game2, delta) {
     game2.Context2D.resetTransform();
     game2.Context2D.clearRect(0, 0, game2.ViewportWidth, game2.ViewportHeight);
@@ -2187,7 +2094,7 @@
       return;
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
+      if ((game2.World.Signature[i] & QUERY11) == QUERY11) {
         get_translation(position3, game2.World.Transform[i].World);
         transform_position(position3, position3, main_camera.Pv);
         if (position3[2] < -1 || position3[2] > 1) {
@@ -2218,39 +2125,39 @@
   }
 
   // ../src/systems/sys_lifespan.ts
-  var QUERY13 = 2048 /* Lifespan */;
+  var QUERY12 = 2048 /* Lifespan */;
   function sys_lifespan(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY13) == QUERY13) {
-        update10(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
+        update9(game2, i, delta);
       }
     }
   }
-  function update10(game2, entity, delta) {
-    let lifespan2 = game2.World.Lifespan[entity];
-    lifespan2.Remaining -= delta;
-    if (lifespan2.Remaining < 0) {
-      if (lifespan2.Action) {
-        dispatch(game2, lifespan2.Action, entity);
+  function update9(game2, entity, delta) {
+    let lifespan = game2.World.Lifespan[entity];
+    lifespan.Remaining -= delta;
+    if (lifespan.Remaining < 0) {
+      if (lifespan.Action) {
+        dispatch(game2, lifespan.Action, entity);
       }
       destroy_all(game2.World, entity);
     }
   }
 
   // ../src/systems/sys_light.ts
-  var QUERY14 = 4194304 /* Transform */ | 4096 /* Light */;
+  var QUERY13 = 4194304 /* Transform */ | 4096 /* Light */;
   function sys_light(game2, delta) {
     game2.LightPositions.fill(0);
     game2.LightDetails.fill(0);
     let counter = 0;
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY14) === QUERY14) {
-        update11(game2, i, counter++);
+      if ((game2.World.Signature[i] & QUERY13) === QUERY13) {
+        update10(game2, i, counter++);
       }
     }
   }
   var world_pos = [0, 0, 0];
-  function update11(game2, entity, idx) {
+  function update10(game2, entity, idx) {
     let light = game2.World.Light[entity];
     let transform2 = game2.World.Transform[entity];
     if (light.Kind === 2 /* Directional */) {
@@ -2269,10 +2176,10 @@
   }
 
   // ../src/systems/sys_mimic.ts
-  var QUERY15 = 4194304 /* Transform */ | 8192 /* Mimic */;
+  var QUERY14 = 4194304 /* Transform */ | 8192 /* Mimic */;
   function sys_mimic(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY15) === QUERY15) {
+      if ((game2.World.Signature[ent] & QUERY14) === QUERY14) {
         let follower_transform = game2.World.Transform[ent];
         let follower_mimic = game2.World.Mimic[ent];
         let target_transform = game2.World.Transform[follower_mimic.Target];
@@ -2286,16 +2193,16 @@
   }
 
   // ../src/systems/sys_move.ts
-  var QUERY16 = 4194304 /* Transform */ | 16384 /* Move */;
+  var QUERY15 = 4194304 /* Transform */ | 16384 /* Move */;
   var NO_ROTATION = [0, 0, 0, 1];
   function sys_move(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY16) === QUERY16) {
-        update12(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY15) === QUERY15) {
+        update11(game2, i, delta);
       }
     }
   }
-  function update12(game2, entity, delta) {
+  function update11(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let move2 = game2.World.Move[entity];
     if (move2.Direction[0] !== 0 || move2.Direction[1] !== 0 || move2.Direction[2] !== 0) {
@@ -2328,17 +2235,17 @@
   }
 
   // ../src/systems/sys_particles.ts
-  var QUERY17 = 4194304 /* Transform */ | 1024 /* EmitParticles */;
+  var QUERY16 = 4194304 /* Transform */ | 1024 /* EmitParticles */;
   function sys_particles(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY17) == QUERY17) {
-        update13(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY16) == QUERY16) {
+        update12(game2, i, delta);
       }
     }
   }
   var origin = [0, 0, 0];
   var forward3 = [0, 0, 0];
-  function update13(game2, entity, delta) {
+  function update12(game2, entity, delta) {
     let emitter = game2.World.EmitParticles[entity];
     let transform2 = game2.World.Transform[entity];
     emitter.SinceLast += delta;
@@ -2377,16 +2284,16 @@
   }
 
   // ../src/systems/sys_physics_integrate.ts
-  var QUERY18 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+  var QUERY17 = 4194304 /* Transform */ | 131072 /* RigidBody */;
   var GRAVITY = -9.81;
   function sys_physics_integrate(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
-        update14(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY17) === QUERY17) {
+        update13(game2, i, delta);
       }
     }
   }
-  function update14(game2, entity, delta) {
+  function update13(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (rigid_body2.Kind === 1 /* Dynamic */) {
@@ -2403,17 +2310,17 @@
   }
 
   // ../src/systems/sys_physics_kinematic.ts
-  var QUERY19 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+  var QUERY18 = 4194304 /* Transform */ | 131072 /* RigidBody */;
   function sys_physics_kinematic(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY19) === QUERY19) {
-        update15(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
+        update14(game2, i, delta);
       }
     }
   }
   var current_position = [0, 0, 0];
   var movement_delta = [0, 0, 0];
-  function update15(game2, entity, delta) {
+  function update14(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     get_translation(current_position, transform2.World);
@@ -2425,16 +2332,16 @@
   }
 
   // ../src/systems/sys_physics_resolve.ts
-  var QUERY20 = 4194304 /* Transform */ | 32 /* Collide */ | 131072 /* RigidBody */;
+  var QUERY19 = 4194304 /* Transform */ | 32 /* Collide */ | 131072 /* RigidBody */;
   function sys_physics_resolve(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY20) === QUERY20) {
-        update16(game2, i);
+      if ((game2.World.Signature[i] & QUERY19) === QUERY19) {
+        update15(game2, i);
       }
     }
   }
   var a = [0, 0, 0];
-  function update16(game2, entity) {
+  function update15(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     let collide2 = game2.World.Collide[rigid_body2.ColliderId];
@@ -2474,24 +2381,12 @@
     }
   }
 
-  // ../src/components/com_task.ts
-  function task_timeout(duration, on_done) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 1048576 /* Task */;
-      game2.World.Task[entity] = {
-        Kind: 1 /* Timeout */,
-        Remaining: duration,
-        OnDone: on_done
-      };
-    };
-  }
-
   // ../src/systems/sys_poll.ts
-  var QUERY21 = 1048576 /* Task */;
+  var QUERY20 = 1048576 /* Task */;
   function sys_poll(game2, delta) {
     let tasks_to_complete = [];
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY21) === QUERY21) {
+      if ((game2.World.Signature[i] & QUERY20) === QUERY20) {
         if (has_blocking_dependencies(game2.World, i)) {
           continue;
         }
@@ -2594,7 +2489,7 @@
   }
 
   // ../src/systems/sys_render_forward.ts
-  var QUERY22 = 4194304 /* Transform */ | 65536 /* Render */;
+  var QUERY21 = 4194304 /* Transform */ | 65536 /* Render */;
   function sys_render_forward(game2, delta) {
     for (let camera_entity of game2.Cameras) {
       let camera = game2.World.Camera[camera_entity];
@@ -2623,7 +2518,7 @@
     let current_front_face = null;
     let transparent_entities = [];
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY22) === QUERY22) {
+      if ((game2.World.Signature[ent] & QUERY21) === QUERY21) {
         let render = game2.World.Render[ent];
         if (render.Phase === 1 /* Transparent */) {
           transparent_entities.push(ent);
@@ -2853,7 +2748,7 @@
   }
 
   // ../src/systems/sys_resize.ts
-  var QUERY23 = 8 /* Camera */;
+  var QUERY22 = 8 /* Camera */;
   function sys_resize(game2, delta) {
     if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
       game2.ViewportResized = true;
@@ -2877,7 +2772,7 @@
         }
       }
       for (let i = 0; i < game2.World.Signature.length; i++) {
-        if ((game2.World.Signature[i] & QUERY23) === QUERY23) {
+        if ((game2.World.Signature[i] & QUERY22) === QUERY22) {
           let camera = game2.World.Camera[i];
           switch (camera.Kind) {
             case 0 /* Canvas */:
@@ -2906,25 +2801,48 @@
   }
 
   // ../src/systems/sys_shake.ts
-  var QUERY24 = 4194304 /* Transform */ | 262144 /* Shake */;
+  var QUERY23 = 4194304 /* Transform */ | 262144 /* Shake */;
   function sys_shake(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
-        update17(game2, i);
+      if ((game2.World.Signature[i] & QUERY23) == QUERY23) {
+        update16(game2, i);
       }
     }
   }
-  function update17(game2, entity) {
-    let shake2 = game2.World.Shake[entity];
+  function update16(game2, entity) {
+    let shake = game2.World.Shake[entity];
     let transform2 = game2.World.Transform[entity];
     transform2.Translation = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
-    scale(transform2.Translation, transform2.Translation, shake2.Magnitude * 2);
+    scale(transform2.Translation, transform2.Translation, shake.Magnitude * 2);
     game2.World.Signature[entity] |= 256 /* Dirty */;
   }
 
   // ../src/systems/sys_spawn.ts
-  var QUERY25 = 4194304 /* Transform */ | 524288 /* Spawn */;
+  var QUERY24 = 4194304 /* Transform */ | 524288 /* Spawn */;
   function sys_spawn(game2, delta) {
+    for (let i = 0; i < game2.World.Signature.length; i++) {
+      if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
+        update17(game2, i, delta);
+      }
+    }
+  }
+  function update17(game2, entity, delta) {
+    let spawn = game2.World.Spawn[entity];
+    spawn.SinceLast += delta;
+    if (spawn.SinceLast > spawn.Interval) {
+      spawn.SinceLast = 0;
+      let entity_transform = game2.World.Transform[entity];
+      let world_position2 = [0, 0, 0];
+      get_translation(world_position2, entity_transform.World);
+      let world_rotation = [0, 0, 0, 0];
+      get_rotation(world_rotation, entity_transform.World);
+      instantiate(game2, [...spawn.Creator(game2), transform(world_position2, world_rotation)]);
+    }
+  }
+
+  // ../src/systems/sys_toggle.ts
+  var QUERY25 = 2097152 /* Toggle */;
+  function sys_toggle(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY25) == QUERY25) {
         update18(game2, i, delta);
@@ -2932,48 +2850,25 @@
     }
   }
   function update18(game2, entity, delta) {
-    let spawn2 = game2.World.Spawn[entity];
-    spawn2.SinceLast += delta;
-    if (spawn2.SinceLast > spawn2.Interval) {
-      spawn2.SinceLast = 0;
-      let entity_transform = game2.World.Transform[entity];
-      let world_position2 = [0, 0, 0];
-      get_translation(world_position2, entity_transform.World);
-      let world_rotation = [0, 0, 0, 0];
-      get_rotation(world_rotation, entity_transform.World);
-      instantiate(game2, [...spawn2.Creator(game2), transform(world_position2, world_rotation)]);
-    }
-  }
-
-  // ../src/systems/sys_toggle.ts
-  var QUERY26 = 2097152 /* Toggle */;
-  function sys_toggle(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY26) == QUERY26) {
-        update19(game2, i, delta);
-      }
-    }
-  }
-  function update19(game2, entity, delta) {
-    let toggle2 = game2.World.Toggle[entity];
-    toggle2.SinceLast += delta;
-    if (toggle2.SinceLast > toggle2.Frequency) {
-      toggle2.SinceLast = 0;
-      if (toggle2.CurrentlyEnabled) {
-        toggle2.CurrentlyEnabled = false;
-        game2.World.Signature[entity] &= ~toggle2.Mask;
+    let toggle = game2.World.Toggle[entity];
+    toggle.SinceLast += delta;
+    if (toggle.SinceLast > toggle.Frequency) {
+      toggle.SinceLast = 0;
+      if (toggle.CurrentlyEnabled) {
+        toggle.CurrentlyEnabled = false;
+        game2.World.Signature[entity] &= ~toggle.Mask;
       } else {
-        toggle2.CurrentlyEnabled = true;
-        game2.World.Signature[entity] |= toggle2.Mask;
+        toggle.CurrentlyEnabled = true;
+        game2.World.Signature[entity] |= toggle.Mask;
       }
     }
   }
 
   // ../src/systems/sys_transform.ts
-  var QUERY27 = 4194304 /* Transform */ | 256 /* Dirty */;
+  var QUERY26 = 4194304 /* Transform */ | 256 /* Dirty */;
   function sys_transform(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY27) === QUERY27) {
+      if ((game2.World.Signature[ent] & QUERY26) === QUERY26) {
         let transform2 = game2.World.Transform[ent];
         update_transform(game2.World, ent, transform2);
       }
@@ -3006,21 +2901,21 @@
   }
 
   // ../src/systems/sys_trigger.ts
-  var QUERY28 = 4194304 /* Transform */ | 32 /* Collide */ | 8388608 /* Trigger */;
+  var QUERY27 = 4194304 /* Transform */ | 32 /* Collide */ | 8388608 /* Trigger */;
   function sys_trigger(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY28) === QUERY28) {
-        update20(game2, i);
+      if ((game2.World.Signature[i] & QUERY27) === QUERY27) {
+        update19(game2, i);
       }
     }
   }
-  function update20(game2, entity) {
+  function update19(game2, entity) {
     let collide2 = game2.World.Collide[entity];
-    let trigger2 = game2.World.Trigger[entity];
+    let trigger = game2.World.Trigger[entity];
     for (let collision of collide2.Collisions) {
       let other_collide = game2.World.Collide[collision.Other];
-      if (trigger2.Mask & other_collide.Layers) {
-        dispatch(game2, trigger2.Action, [entity, collision.Other]);
+      if (trigger.Mask & other_collide.Layers) {
+        dispatch(game2, trigger.Action, [entity, collision.Other]);
       }
     }
   }
@@ -3137,7 +3032,6 @@
       sys_resize(this, delta);
       sys_camera(this, delta);
       sys_control_keyboard(this, delta);
-      sys_control_mouse_move(this, delta);
       sys_control_touch_move(this, delta);
       sys_control_xbox(this, delta);
       sys_control_jump(this, delta);
@@ -3227,10 +3121,28 @@
       collide(false, 2 /* Terrain */, 0 /* None */),
       rigid_body(0 /* Static */),
       children([
-        transform([0, float(-0.2, 0.2), 0]),
+        transform([0, float(0, 0.1), 0]),
         render_colored_shaded(game2.MaterialColoredShaded, game2.MeshCube, [0, 1, 0.1, 1])
       ])
     ];
+  }
+
+  // ../common/easing.ts
+  function ease_in_quad(t) {
+    return t * t;
+  }
+  function ease_out_quad(t) {
+    return 1 - (1 - t) ** 2;
+  }
+  function ease_in_out_quad(t) {
+    return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+  }
+
+  // ../src/components/com_audio_listener.ts
+  function audio_listener() {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 2 /* AudioListener */;
+    };
   }
 
   // ../src/components/com_audio_source.ts
@@ -3246,52 +3158,27 @@
     };
   }
 
-  // ../src/components/com_callback.ts
-  function callback(fn) {
-    return (game2, entity) => {
-      fn(game2, entity);
-    };
-  }
-
   // ../src/components/com_control_always.ts
-  function control_always(direction, rotation3) {
+  function control_always(direction, rotation2) {
     return (game2, entity) => {
       game2.World.Signature[entity] |= 64 /* ControlAlways */;
       game2.World.ControlAlways[entity] = {
         Direction: direction,
-        Rotation: rotation3
+        Rotation: rotation2
       };
     };
   }
 
-  // ../src/components/com_disable.ts
-  function disable(mask) {
+  // ../src/components/com_control_player.ts
+  function control_player(jump, yaw, pitch, min_pitch = 0, max_pitch = 0) {
     return (game2, entity) => {
-      game2.World.Signature[entity] &= ~mask;
-    };
-  }
-
-  // ../src/components/com_emit_particles.ts
-  function emit_particles(lifespan2, frequency, speed) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 1024 /* EmitParticles */;
-      game2.World.EmitParticles[entity] = {
-        Lifespan: lifespan2,
-        Frequency: frequency,
-        Speed: speed,
-        Instances: [],
-        SinceLast: 0
-      };
-    };
-  }
-
-  // ../src/components/com_lifespan.ts
-  function lifespan(remaining, action) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 2048 /* Lifespan */;
-      game2.World.Lifespan[entity] = {
-        Remaining: remaining,
-        Action: action
+      game2.World.Signature[entity] |= 128 /* ControlPlayer */;
+      game2.World.ControlPlayer[entity] = {
+        Jump: jump,
+        Yaw: yaw,
+        Pitch: pitch,
+        MinPitch: min_pitch,
+        MaxPitch: max_pitch
       };
     };
   }
@@ -3332,144 +3219,12 @@
     };
   }
 
-  // ../src/components/com_shake.ts
-  function shake(magnitude) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 262144 /* Shake */;
-      game2.World.Shake[entity] = {
-        Magnitude: magnitude
-      };
-    };
-  }
-
-  // ../src/components/com_toggle.ts
-  function toggle(mask, frequency, init) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 2097152 /* Toggle */;
-      game2.World.Toggle[entity] = {
-        Mask: mask,
-        Frequency: frequency,
-        SinceLast: frequency,
-        CurrentlyEnabled: !init
-      };
-    };
-  }
-
-  // ../src/components/com_trigger.ts
-  function trigger(mask, action) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 8388608 /* Trigger */;
-      game2.World.Trigger[entity] = {
-        Mask: mask,
-        Action: action
-      };
-    };
-  }
-
-  // ../src/blueprints/blu_item.ts
-  function blueprint_item(game2) {
-    let shaker_entity;
-    let particles_entity;
-    return [
-      collide(true, 8 /* Collectable */, 2 /* Terrain */ | 1 /* Player */),
-      trigger(1 /* Player */, 1 /* CollectItem */),
-      rigid_body(1 /* Dynamic */, 0.3),
-      audio_source(true),
-      lifespan(5, 2 /* ExpireItem */),
-      disable(2048 /* Lifespan */),
-      children([
-        callback((game3, entity) => shaker_entity = entity),
-        transform(void 0, void 0, [0.5, 0.7, 0.1]),
-        control_always(null, [0, 1, 0, 0]),
-        move(0, 0.2),
-        shake(0.05),
-        toggle(262144 /* Shake */, 1, true),
-        disable(262144 /* Shake */ | 2097152 /* Toggle */),
-        children([
-          transform([0, 1, 0]),
-          render_colored_shaded(game2.MaterialColoredShaded, game2.MeshCube, [5, 3, 0, 1]),
-          children([transform([0, 1, 0]), light_point([1, 0.5, 0], 3)])
-        ])
-      ], [
-        transform([0, 1.5, 0]),
-        control_always(null, [0, 1, 0, 0]),
-        move(0, 2),
-        children([
-          transform([0, 0, 0.2], from_euler([0, 0, 0, 1], -90, 0, 0)),
-          children([
-            callback((game3, entity) => particles_entity = entity),
-            transform(),
-            shake(0.05),
-            emit_particles(2, 0.2, 1),
-            render_particles_colored(game2.MaterialParticlesColored, [1, 1, 1, 1], 5, [1, 1, 1, 0], 1)
-          ])
-        ])
-      ]),
-      task_timeout(10, (entity) => {
-        game2.World.Signature[entity] |= 2048 /* Lifespan */;
-        game2.World.Signature[shaker_entity] |= 262144 /* Shake */ | 2097152 /* Toggle */;
-        let particles_shake = game2.World.Shake[particles_entity];
-        particles_shake.Magnitude = 0.1;
-        let particles_emit = game2.World.EmitParticles[particles_entity];
-        particles_emit.Lifespan = 1;
-        particles_emit.Frequency = 0.1;
-        let particles_render = game2.World.Render[particles_entity];
-        particles_render.ColorStart = [1, 1, 0, 1];
-        particles_render.ColorEnd = [1, 0, 0, 0];
-        particles_render.Size = [10, 5];
-      })
-    ];
-  }
-
-  // ../src/blueprints/blu_obstacle.ts
-  function blueprint_obstacle(game2) {
-    return [
-      collide(true, 4 /* Obstacle */, 2 /* Terrain */ | 1 /* Player */),
-      rigid_body(1 /* Dynamic */, 0.3),
-      children([
-        transform(),
-        render_colored_shaded(game2.MaterialColoredShaded, game2.MeshCube, [0.5, 0.5, 0.5, 0.3])
-      ])
-    ];
-  }
-
-  // ../common/easing.ts
-  function ease_in_quad(t) {
-    return t * t;
-  }
-  function ease_out_quad(t) {
-    return 1 - (1 - t) ** 2;
-  }
-  function ease_in_out_quad(t) {
-    return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
-  }
-
-  // ../src/components/com_audio_listener.ts
-  function audio_listener() {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 2 /* AudioListener */;
-    };
-  }
-
-  // ../src/components/com_control_player.ts
-  function control_player(move2, yaw, pitch, min_pitch = 0, max_pitch = 0) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 128 /* ControlPlayer */;
-      game2.World.ControlPlayer[entity] = {
-        Move: move2,
-        Yaw: yaw,
-        Pitch: pitch,
-        MinPitch: min_pitch,
-        MaxPitch: max_pitch
-      };
-    };
-  }
-
   // ../src/blueprints/blu_player.ts
   function blueprint_player(game2) {
     return [
       control_player(true, 0.2, 0),
-      move(10, 3),
+      control_always([0, 0, 1], null),
+      move(20, 3),
       collide(true, 1 /* Player */, 2 /* Terrain */),
       rigid_body(1 /* Dynamic */),
       audio_source(false),
@@ -3513,38 +3268,33 @@
           }
         })
       ], [
-        transform(),
+        transform(void 0, from_euler([0, 0, 0, 1], 15, 0, 0)),
         named("camera anchor"),
         move(0, 3),
-        control_player(false, 0, 0.2, -10, 80)
+        control_player(false, 0, 0.2, -10, 30)
       ], [transform([0, 2, 0]), light_point([1, 1, 1], 5)])
     ];
   }
 
-  // ../src/components/com_spawn.ts
-  function spawn(creator, interval) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 524288 /* Spawn */;
-      game2.World.Spawn[entity] = {
-        Creator: creator,
-        Interval: interval,
-        SinceLast: interval
-      };
-    };
-  }
-
-  // ../src/scenes/sce_stage.ts
-  function scene_stage(game2) {
+  // ../src/scenes/sce_run.ts
+  function scene_run(game2) {
     game2.World = new World();
     game2.ViewportResized = true;
-    let map_size = 10;
+    let map_width = 3;
+    let map_length = 100;
     let tile_size = 5;
-    for (let z = 0; z < map_size; z++) {
-      for (let x = 0; x < map_size; x++) {
-        instantiate(game2, [
-          ...blueprint_ground(game2),
-          transform([tile_size * (x - map_size / 2), 0, tile_size * (z - map_size / 2)], void 0, [tile_size, 1, tile_size])
-        ]);
+    for (let z = 0; z < map_length; z++) {
+      for (let x = 0; x < map_width; x++) {
+        if (float() > 0.1) {
+          instantiate(game2, [
+            ...blueprint_ground(game2),
+            transform([tile_size * (x - map_width / 2), 0, tile_size * -z], void 0, [
+              tile_size,
+              1,
+              tile_size
+            ])
+          ]);
+        }
       }
     }
     instantiate(game2, [
@@ -3552,32 +3302,12 @@
       light_directional([1, 1, 1], 0.1)
     ]);
     instantiate(game2, [...blueprint_player(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
-    instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 1e3, 1e3], [0, 1, 0, 0])]);
-    instantiate(game2, [
-      transform([0, 15, 0]),
-      control_always(null, [0, 1, 0, 0]),
-      move(0, 1),
-      children([
-        transform([0, 0, 10]),
-        children([transform(), shake(10), spawn(blueprint_item, 3)])
-      ])
-    ]);
-    for (let i = 0; i < 100; i++) {
-      instantiate(game2, [
-        transform([float(-10, 10), 1, float(-10, 10)], void 0, [
-          float(0.5, 1.5),
-          float(0.5, 1.5),
-          float(0.5, 1.5)
-        ]),
-        ...blueprint_obstacle(game2)
-      ]);
-    }
+    instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
   }
 
   // ../src/index.ts
   var game = new Game();
-  input_pointer_lock(game);
-  scene_stage(game);
+  scene_run(game);
   game.Start();
   window.$ = dispatch.bind(null, game);
   window.game = game;
