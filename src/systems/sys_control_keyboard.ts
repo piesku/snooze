@@ -37,11 +37,10 @@ function update(game: Game, entity: Entity) {
         let move = game.World.Move[entity];
 
         let current_pitch = get_pitch(transform.Rotation);
-        if (game.InputState["ArrowUp"] && current_pitch > control.MinPitch) {
+        if (game.InputState["ArrowDown"] && current_pitch > control.MinPitch) {
             // Look up.
             multiply(move.SelfRotation, move.SelfRotation, [-1, 0, 0, 0]);
-        }
-        if (game.InputState["ArrowDown"] && current_pitch < control.MaxPitch) {
+        } else if (current_pitch < control.MaxPitch) {
             // Look down.
             multiply(move.SelfRotation, move.SelfRotation, [1, 0, 0, 0]);
         }

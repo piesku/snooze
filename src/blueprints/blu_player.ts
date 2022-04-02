@@ -74,7 +74,7 @@ export function blueprint_player(game: Game) {
                 transform(undefined, from_euler([0, 0, 0, 1], 15, 0, 0)),
                 named("camera anchor"),
                 move(0, 3),
-                control_player(false, 0, 0.2, -10, 30),
+                control_player(false, 0, 0.2, -10, 15),
             ],
             // Overhead light.
             [transform([0, 2, 0]), light_point([1, 1, 1], 5)]

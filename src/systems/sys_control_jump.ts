@@ -18,7 +18,7 @@ function update(game: Game, entity: Entity) {
     let rigid_body = game.World.RigidBody[entity];
 
     if (control.Jump) {
-        if (game.InputState["Space"]) {
+        if (game.InputState["ArrowUp"]) {
             // Jump
             if (!rigid_body.IsAirborne) {
                 rigid_body.Acceleration[1] += 300;
