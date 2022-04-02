@@ -27,7 +27,7 @@ export function scene_run(game: Game) {
 
     // Ground.
     let map_width = 3;
-    let map_length = 15;
+    let map_length = 20;
     let tile_size = 5;
     for (let z = 0; z < map_length; z++) {
         for (let x = 0; x < map_width; x++) {

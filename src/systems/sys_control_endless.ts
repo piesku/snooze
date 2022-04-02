@@ -10,13 +10,28 @@ import {Game} from "../game.js";
 import {Has} from "../world.js";
 
 const QUERY = Has.ControlPlayer | Has.Transform;
-const PADDING = 5;
 
 export function sys_control_endless(game: Game, delta: number) {
     for (let i = 0; i < game.World.Signature.length; i++) {
         if ((game.World.Signature[i] & QUERY) === QUERY) {
             update(game, i);
         }
+    }
+
+    let platforms_traveled = -Math.floor(game.DistanceTraveled / 5);
+    if (platforms_traveled > game.PlatformsTraveled) {
+        game.PlatformsTraveled = platforms_traveled;
+
+        instantiate(game, [
+            ...blueprint_ground(game),
+            transform([0, 0, -game.PlatformsTraveled * 5 - 100], undefined, [5, 1, 5]),
+            callback((game, entity) => {
+                for (let child of query_down(game.World, entity, Has.Animate)) {
+                    let animate = game.World.Animate[child];
+                    animate.Trigger = "drop";
+                }
+            }),
+        ]);
     }
 }
 
@@ -26,18 +41,7 @@ function update(game: Game, entity: Entity) {
     let world_position: Vec3 = [0, 0, 0];
     get_translation(world_position, local_transform.World);
 
-    if (world_position[2] < game.DistanceTraveled - PADDING) {
-        game.DistanceTraveled -= PADDING;
-
-        instantiate(game, [
-            ...blueprint_ground(game),
-            transform([0, 0, game.DistanceTraveled - 50], undefined, [5, 1, 5]),
-            callback((game, entity) => {
-                for (let child of query_down(game.World, entity, Has.Animate)) {
-                    let animate = game.World.Animate[child];
-                    animate.Trigger = "drop";
-                }
-            }),
-        ]);
+    if (world_position[2] < game.DistanceTraveled) {
+        game.DistanceTraveled = world_position[2];
     }
 }

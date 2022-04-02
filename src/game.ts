@@ -50,6 +50,7 @@ export class Game extends Game3D {
 
     ItemsCollected = 0;
     DistanceTraveled = 0;
+    PlatformsTraveled = 0;
 
     override FixedUpdate(delta: number) {
         // Collisions and physics.

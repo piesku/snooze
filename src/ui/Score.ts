@@ -22,7 +22,7 @@ export function Score(game: Game) {
             "
         >
             <div>Collected: ${game.ItemsCollected}</div>
-            <div>Distance: ${-game.DistanceTraveled}</div>
+            <div>Distance: ${-game.DistanceTraveled.toFixed(0)}</div>
         </div>
     `;
 }

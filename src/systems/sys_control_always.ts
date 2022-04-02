@@ -8,7 +8,7 @@ import {Entity} from "../../common/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
-const QUERY = Has.ControlAlways | Has.Transform | Has.Move;
+const QUERY = Has.ControlAlways | Has.Move;
 
 export function sys_control_always(game: Game, delta: number) {
     for (let i = 0; i < game.World.Signature.length; i++) {
