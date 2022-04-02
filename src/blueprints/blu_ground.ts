@@ -15,7 +15,7 @@ export function blueprint_ground(game: Game) {
         rigid_body(RigidKind.Static),
         lifespan(10),
         children([
-            transform([0, float(0, 0.1), 0]),
+            transform(),
             render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [0, 1, 0.1, 1]),
             animate({
                 idle: {
@@ -36,7 +36,7 @@ export function blueprint_ground(game: Game) {
                         },
                         {
                             Timestamp: 2,
-                            Translation: [0, 0, 0],
+                            Translation: [0, float(-0.1, 0.2), 0],
                             Ease: ease_out_quad,
                         },
                     ],

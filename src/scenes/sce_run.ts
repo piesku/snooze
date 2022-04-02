@@ -1,6 +1,5 @@
 import {instantiate} from "../../common/game.js";
 import {from_euler} from "../../common/quat.js";
-import {float} from "../../common/random.js";
 import {blueprint_camera_follow} from "../blueprints/blu_camera_follow.js";
 import {blueprint_ground} from "../blueprints/blu_ground.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
@@ -26,21 +25,12 @@ export function scene_run(game: Game) {
     ]);
 
     // Ground.
-    let map_width = 3;
-    let map_length = 20;
-    let tile_size = 5;
+    let map_length = 11;
+    let tile_size = 10;
     for (let z = 0; z < map_length; z++) {
-        for (let x = 0; x < map_width; x++) {
-            if (float() > 0.1) {
-                instantiate(game, [
-                    ...blueprint_ground(game),
-                    transform([tile_size * (x - map_width / 2), 0, tile_size * -z], undefined, [
-                        tile_size,
-                        1,
-                        tile_size,
-                    ]),
-                ]);
-            }
-        }
+        instantiate(game, [
+            ...blueprint_ground(game),
+            transform([0, 0, tile_size * -z], undefined, [tile_size, 1, tile_size]),
+        ]);
     }
 }
