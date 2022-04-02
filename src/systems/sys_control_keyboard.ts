@@ -16,26 +16,6 @@ export function sys_control_keyboard(game: Game, delta: number) {
 function update(game: Game, entity: Entity) {
     let control = game.World.ControlPlayer[entity];
 
-    if (control.Move) {
-        let move = game.World.Move[entity];
-        if (game.InputState["KeyW"]) {
-            // Move forward
-            move.Direction[2] += 1;
-        }
-        if (game.InputState["KeyA"]) {
-            // Strafe left
-            move.Direction[0] += 1;
-        }
-        if (game.InputState["KeyS"]) {
-            // Move backward
-            move.Direction[2] -= 1;
-        }
-        if (game.InputState["KeyD"]) {
-            // Strafe right
-            move.Direction[0] -= 1;
-        }
-    }
-
     if (control.Yaw) {
         // Yaw is applied relative to the entity's local space; the Y axis is
         // not affected by its current orientation.

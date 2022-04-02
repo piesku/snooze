@@ -29,18 +29,6 @@ export function sys_control_xbox(game: Game, delta: number) {
 function update(game: Game, entity: Entity) {
     let control = game.World.ControlPlayer[entity];
 
-    if (control.Move) {
-        let move = game.World.Move[entity];
-        if (Math.abs(game.InputDelta["pad0_axis_1"]) > DEAD_ZONE) {
-            // Strafe movement.
-            move.Direction[0] -= game.InputDelta["pad0_axis_1"];
-        }
-        if (Math.abs(game.InputDelta["pad0_axis_2"]) > DEAD_ZONE) {
-            // Forward movement.
-            move.Direction[2] -= game.InputDelta["pad0_axis_2"];
-        }
-    }
-
     if (control.Yaw && Math.abs(game.InputDelta["pad0_axis_3"]) > DEAD_ZONE) {
         let move = game.World.Move[entity];
         let amount = game.InputDelta["pad0_axis_3"] * Math.PI;

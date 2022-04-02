@@ -11,7 +11,7 @@ export function blueprint_ground(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         children([
-            transform([0, float(-0.2, 0.2), 0]),
+            transform([0, float(0, 0.1), 0]),
             render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [0, 1, 0.1, 1]),
         ]),
     ];

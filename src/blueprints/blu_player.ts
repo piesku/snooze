@@ -17,7 +17,7 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_player(game: Game) {
     return [
-        control_player(false, 0.2, 0),
+        control_player(true, 0.2, 0),
         control_always([0, 0, 1], null),
         move(20, 3),
         collide(true, Layer.Player, Layer.Terrain),
@@ -67,10 +67,10 @@ export function blueprint_player(game: Game) {
             ],
             // Camera rig anchor.
             [
-                transform(),
+                transform(undefined, from_euler([0, 0, 0, 1], 15, 0, 0)),
                 named("camera anchor"),
                 move(0, 3),
-                control_player(false, 0, 0.2, -10, 80),
+                control_player(false, 0, 0.2, -10, 30),
             ],
             // Overhead light.
             [transform([0, 2, 0]), light_point([1, 1, 1], 5)]

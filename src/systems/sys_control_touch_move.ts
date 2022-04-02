@@ -35,21 +35,6 @@ function update(game: Game, entity: Entity) {
     let control = game.World.ControlPlayer[entity];
     let move = game.World.Move[entity];
 
-    if (control.Move && game.InputState["Touch0"] === 1) {
-        let divisor = Math.min(game.ViewportWidth, game.ViewportHeight) / 4;
-        let amount_x = (game.InputState["Touch0X"] - joystick[0]) / divisor;
-        let amount_y = (game.InputState["Touch0Y"] - joystick[1]) / divisor;
-
-        if (Math.abs(amount_x) > DEAD_ZONE) {
-            // Strafe movement.
-            move.Direction[0] += clamp(-1, 1, -amount_x);
-        }
-        if (Math.abs(amount_y) > DEAD_ZONE) {
-            // Forward movement.
-            move.Direction[2] += clamp(-1, 1, -amount_y);
-        }
-    }
-
     if (control.Yaw && game.InputDelta["Touch1X"]) {
         let amount = game.InputDelta["Touch1X"] * control.Yaw * TOUCH_SENSITIVITY * DEG_TO_RAD;
         // See sys_control_mouse.

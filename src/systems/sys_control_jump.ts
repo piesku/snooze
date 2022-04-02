@@ -17,7 +17,7 @@ function update(game: Game, entity: Entity) {
     let control = game.World.ControlPlayer[entity];
     let rigid_body = game.World.RigidBody[entity];
 
-    if (control.Move) {
+    if (control.Jump) {
         if (game.InputState["Space"]) {
             // Jump
             if (!rigid_body.IsAirborne) {
