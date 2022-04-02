@@ -24,9 +24,5 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
             game.ItemsCollected++;
             break;
         }
-        case Action.ExpireItem: {
-            game.ItemsMissed++;
-            break;
-        }
     }
 }
