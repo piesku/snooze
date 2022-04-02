@@ -1,7 +1,9 @@
+import {create_depth_target, RenderTarget} from "../common/framebuffer.js";
 import {Game3D} from "../common/game.js";
 import {MAX_FORWARD_LIGHTS} from "../materials/light.js";
-import {mat_forward_colored_phong} from "../materials/mat_forward_colored_phong.js";
+import {mat_forward_colored_shadows} from "../materials/mat_forward_colored_shadows.js";
 import {mat_forward_colored_wireframe} from "../materials/mat_forward_colored_unlit.js";
+import {mat_forward_depth} from "../materials/mat_forward_depth.js";
 import {mat_forward_particles_colored} from "../materials/mat_forward_particles_colored.js";
 import {mesh_cube} from "../meshes/cube.js";
 import {sys_animate} from "./systems/sys_animate.js";
@@ -26,6 +28,7 @@ import {sys_physics_integrate} from "./systems/sys_physics_integrate.js";
 import {sys_physics_kinematic} from "./systems/sys_physics_kinematic.js";
 import {sys_physics_resolve} from "./systems/sys_physics_resolve.js";
 import {sys_poll} from "./systems/sys_poll.js";
+import {sys_render_depth} from "./systems/sys_render_depth.js";
 import {sys_render_forward} from "./systems/sys_render_forward.js";
 import {sys_resize} from "./systems/sys_resize.js";
 import {sys_shake} from "./systems/sys_shake.js";
@@ -40,13 +43,20 @@ export class Game extends Game3D {
     World = new World();
 
     MaterialWireframe = mat_forward_colored_wireframe(this.Gl);
-    MaterialColoredShaded = mat_forward_colored_phong(this.Gl);
+    MaterialColoredShadows = mat_forward_colored_shadows(this.Gl);
     MaterialParticlesColored = mat_forward_particles_colored(this.Gl);
+    MaterialDepth = mat_forward_depth(this.Gl);
 
     MeshCube = mesh_cube(this.Gl);
 
     LightPositions = new Float32Array(4 * MAX_FORWARD_LIGHTS);
     LightDetails = new Float32Array(4 * MAX_FORWARD_LIGHTS);
+
+    override Targets: {
+        [k: string]: RenderTarget;
+    } = {
+        Sun: create_depth_target(this.Gl, 2048, 2048),
+    };
 
     ItemsCollected = 0;
     DistanceTraveled = 0;
@@ -100,6 +110,7 @@ export class Game extends Game3D {
         sys_audio_listener(this, delta);
         sys_audio_source(this, delta);
         sys_light(this, delta);
+        sys_render_depth(this, delta);
         sys_render_forward(this, delta);
         sys_draw(this, delta);
         sys_ui(this, delta);

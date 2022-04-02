@@ -3,7 +3,7 @@ import {from_euler} from "../../common/quat.js";
 import {blueprint_camera_follow} from "../blueprints/blu_camera_follow.js";
 import {blueprint_ground} from "../blueprints/blu_ground.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
-import {light_directional} from "../components/com_light.js";
+import {blueprint_sun} from "../blueprints/blu_sun.js";
 import {transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 import {World} from "../world.js";
@@ -18,10 +18,10 @@ export function scene_run(game: Game) {
     // Camera.
     instantiate(game, [...blueprint_camera_follow(game), transform([0, 1, 0], [0, 1, 0, 0])]);
 
-    // Directional light.
+    // Directional light and the shadow source.
     instantiate(game, [
-        transform(undefined, from_euler([0, 0, 0, 1], -30, 30, 0)),
-        light_directional([1, 1, 1], 0.1),
+        ...blueprint_sun(game),
+        transform(undefined, from_euler([0, 0, 0, 0], -45, 45, 0)),
     ]);
 
     // Ground.

@@ -13,7 +13,7 @@ import {light_point} from "../components/com_light.js";
 import {move} from "../components/com_move.js";
 import {
     RenderParticlesColored,
-    render_colored_shaded,
+    render_colored_shadows,
     render_particles_colored,
 } from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
@@ -46,7 +46,11 @@ export function blueprint_item(game: Game) {
                 disable(Has.Shake | Has.Toggle),
                 children([
                     transform([0, 1, 0]),
-                    render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [5, 3, 0, 1]),
+                    render_colored_shadows(
+                        game.MaterialColoredShadows,
+                        game.MeshCube,
+                        [5, 3, 0, 1]
+                    ),
                     children([transform([0, 1, 0]), light_point([1, 0.5, 0], 3)]),
                 ]),
             ],

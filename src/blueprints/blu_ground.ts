@@ -4,7 +4,7 @@ import {animate, AnimationFlag} from "../components/com_animate.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
 import {lifespan} from "../components/com_lifespan.js";
-import {render_colored_shaded} from "../components/com_render.js";
+import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
@@ -16,7 +16,7 @@ export function blueprint_ground(game: Game) {
         lifespan(10),
         children([
             transform(),
-            render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [0, 1, 0.1, 1]),
+            render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [0, 1, 0.1, 1]),
             animate({
                 idle: {
                     Flags: AnimationFlag.None,

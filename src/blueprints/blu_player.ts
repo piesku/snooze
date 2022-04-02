@@ -10,7 +10,7 @@ import {control_player} from "../components/com_control_player.js";
 import {light_point} from "../components/com_light.js";
 import {move} from "../components/com_move.js";
 import {named} from "../components/com_named.js";
-import {render_colored_shaded} from "../components/com_render.js";
+import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
@@ -19,7 +19,7 @@ export function blueprint_player(game: Game) {
     return [
         control_player(true, 0.2, 0),
         control_always([0, 0, 1], null),
-        move(20, 3),
+        move(10, 3),
         collide(true, Layer.Player, Layer.Terrain),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
@@ -28,7 +28,11 @@ export function blueprint_player(game: Game) {
             // Body.
             [
                 transform(),
-                render_colored_shaded(game.MaterialColoredShaded, game.MeshCube, [1, 0.3, 0.2, 1]),
+                render_colored_shadows(
+                    game.MaterialColoredShadows,
+                    game.MeshCube,
+                    [1, 0.3, 0.2, 1]
+                ),
                 animate({
                     idle: {
                         Keyframes: [
