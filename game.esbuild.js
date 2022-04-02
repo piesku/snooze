@@ -225,9 +225,9 @@
       for (let name in this.InputDelta) {
         this.InputDelta[name] = 0;
       }
-      let update20 = performance.now() - this.Now;
+      let update21 = performance.now() - this.Now;
       if (update_span) {
-        update_span.textContent = update20.toFixed(1);
+        update_span.textContent = update21.toFixed(1);
       }
       if (delta_span) {
         delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -376,10 +376,6 @@
         let [item_entity] = payload;
         destroy_all(game2.World, item_entity);
         game2.ItemsCollected++;
-        break;
-      }
-      case 2 /* ExpireItem */: {
-        game2.ItemsMissed++;
         break;
       }
     }
@@ -1896,7 +1892,7 @@
   }
 
   // ../src/systems/sys_control_always.ts
-  var QUERY6 = 64 /* ControlAlways */ | 4194304 /* Transform */ | 16384 /* Move */;
+  var QUERY6 = 64 /* ControlAlways */ | 16384 /* Move */;
   function sys_control_always(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
@@ -1915,16 +1911,186 @@
     }
   }
 
-  // ../src/systems/sys_control_jump.ts
-  var QUERY7 = 128 /* ControlPlayer */ | 131072 /* RigidBody */;
-  function sys_control_jump(game2, delta) {
+  // ../common/easing.ts
+  function ease_in_quad(t) {
+    return t * t;
+  }
+  function ease_out_quad(t) {
+    return 1 - (1 - t) ** 2;
+  }
+  function ease_in_out_quad(t) {
+    return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
+  }
+
+  // ../src/components/com_collide.ts
+  function collide(dynamic, layers, mask, size = [1, 1, 1]) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 32 /* Collide */;
+      game2.World.Collide[entity] = {
+        EntityId: entity,
+        New: true,
+        Dynamic: dynamic,
+        Layers: layers,
+        Mask: mask,
+        Size: size,
+        Min: [0, 0, 0],
+        Max: [0, 0, 0],
+        Center: [0, 0, 0],
+        Half: [0, 0, 0],
+        Collisions: []
+      };
+    };
+  }
+
+  // ../src/components/com_lifespan.ts
+  function lifespan(remaining, action) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 2048 /* Lifespan */;
+      game2.World.Lifespan[entity] = {
+        Remaining: remaining,
+        Action: action
+      };
+    };
+  }
+
+  // ../src/components/com_render.ts
+  function render_colored_shaded(material, mesh, diffuse_color, shininess = 0, emission = 0, specular_rgb = [1, 1, 1], front_face = GL_CW) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 65536 /* Render */;
+      game2.World.Render[entity] = {
+        Kind: 1 /* ColoredShaded */,
+        Material: material,
+        Mesh: mesh,
+        Phase: diffuse_color[3] < 1 ? 1 /* Transparent */ : 0 /* Opaque */,
+        FrontFace: front_face,
+        DiffuseColor: diffuse_color,
+        SpecularColor: [...specular_rgb, shininess],
+        EmissiveColor: [diffuse_color[0], diffuse_color[1], diffuse_color[2], emission]
+      };
+    };
+  }
+  var FLOATS_PER_PARTICLE = 8;
+
+  // ../src/components/com_rigid_body.ts
+  function rigid_body(kind, bounciness = 0.5) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 131072 /* RigidBody */;
+      game2.World.RigidBody[entity] = {
+        Kind: kind,
+        ColliderId: entity,
+        Bounciness: bounciness,
+        Acceleration: [0, 0, 0],
+        VelocityIntegrated: [0, 0, 0],
+        VelocityResolved: [0, 0, 0],
+        LastPosition: [0, 0, 0],
+        IsAirborne: false
+      };
+    };
+  }
+
+  // ../src/components/com_transform.ts
+  function transform(translation = [0, 0, 0], rotation2 = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 4194304 /* Transform */ | 256 /* Dirty */;
+      game2.World.Transform[entity] = {
+        World: create(),
+        Self: create(),
+        Translation: translation,
+        Rotation: rotation2,
+        Scale: scale2,
+        Gyroscope: false
+      };
+    };
+  }
+
+  // ../src/blueprints/blu_ground.ts
+  function blueprint_ground(game2) {
+    return [
+      collide(false, 2 /* Terrain */, 0 /* None */),
+      rigid_body(0 /* Static */),
+      lifespan(10),
+      children([
+        transform(),
+        render_colored_shaded(game2.MaterialColoredShaded, game2.MeshCube, [0, 1, 0.1, 1]),
+        animate({
+          idle: {
+            Flags: 0 /* None */,
+            Keyframes: [
+              {
+                Timestamp: Infinity,
+                Translation: [0, 0, 0]
+              }
+            ]
+          },
+          drop: {
+            Flags: 0 /* None */,
+            Keyframes: [
+              {
+                Timestamp: 0,
+                Translation: [0, 15, 0]
+              },
+              {
+                Timestamp: 2,
+                Translation: [0, float(-0.1, 0.2), 0],
+                Ease: ease_out_quad
+              }
+            ]
+          }
+        })
+      ])
+    ];
+  }
+
+  // ../src/components/com_callback.ts
+  function callback(fn) {
+    return (game2, entity) => {
+      fn(game2, entity);
+    };
+  }
+
+  // ../src/systems/sys_control_endless.ts
+  var QUERY7 = 128 /* ControlPlayer */ | 4194304 /* Transform */;
+  var PLATFORM_SIZE = 10;
+  function sys_control_endless(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
         update5(game2, i);
       }
     }
+    let platforms_traveled = -Math.floor(game2.DistanceTraveled / PLATFORM_SIZE);
+    if (platforms_traveled > game2.PlatformsTraveled) {
+      game2.PlatformsTraveled = platforms_traveled;
+      instantiate(game2, [
+        ...blueprint_ground(game2),
+        transform([0, 0, -platforms_traveled * PLATFORM_SIZE - 100], void 0, [10, 1, 10]),
+        callback((game3, entity) => {
+          for (let child of query_down(game3.World, entity, 1 /* Animate */)) {
+            let animate2 = game3.World.Animate[child];
+            animate2.Trigger = "drop";
+          }
+        })
+      ]);
+    }
   }
   function update5(game2, entity) {
+    let local_transform = game2.World.Transform[entity];
+    let world_position2 = [0, 0, 0];
+    get_translation(world_position2, local_transform.World);
+    if (world_position2[2] < game2.DistanceTraveled) {
+      game2.DistanceTraveled = world_position2[2];
+    }
+  }
+
+  // ../src/systems/sys_control_jump.ts
+  var QUERY8 = 128 /* ControlPlayer */ | 131072 /* RigidBody */;
+  function sys_control_jump(game2, delta) {
+    for (let i = 0; i < game2.World.Signature.length; i++) {
+      if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
+        update6(game2, i);
+      }
+    }
+  }
+  function update6(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (control.Jump) {
@@ -1940,15 +2106,15 @@
   }
 
   // ../src/systems/sys_control_keyboard.ts
-  var QUERY8 = 16384 /* Move */ | 128 /* ControlPlayer */;
+  var QUERY9 = 16384 /* Move */ | 128 /* ControlPlayer */;
   function sys_control_keyboard(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
-        update6(game2, i);
+      if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
+        update7(game2, i);
       }
     }
   }
-  function update6(game2, entity) {
+  function update7(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     if (control.Yaw) {
       let move2 = game2.World.Move[entity];
@@ -1973,7 +2139,7 @@
   }
 
   // ../src/systems/sys_control_touch_move.ts
-  var QUERY9 = 16384 /* Move */ | 128 /* ControlPlayer */;
+  var QUERY10 = 16384 /* Move */ | 128 /* ControlPlayer */;
   var AXIS_Y = [0, 1, 0];
   var AXIS_X = [1, 0, 0];
   var TOUCH_SENSITIVITY = 10;
@@ -1985,12 +2151,12 @@
       joystick[1] = game2.InputState["Touch0Y"];
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
-        update7(game2, i);
+      if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
+        update8(game2, i);
       }
     }
   }
-  function update7(game2, entity) {
+  function update8(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let control = game2.World.ControlPlayer[entity];
     let move2 = game2.World.Move[entity];
@@ -2012,7 +2178,7 @@
   }
 
   // ../src/systems/sys_control_xbox.ts
-  var QUERY10 = 16384 /* Move */ | 128 /* ControlPlayer */;
+  var QUERY11 = 16384 /* Move */ | 128 /* ControlPlayer */;
   var AXIS_Y2 = [0, 1, 0];
   var AXIS_X2 = [1, 0, 0];
   var DEAD_ZONE = 0.1;
@@ -2026,12 +2192,12 @@
       }
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
-        update8(game2, i);
+      if ((game2.World.Signature[i] & QUERY11) === QUERY11) {
+        update9(game2, i);
       }
     }
   }
-  function update8(game2, entity) {
+  function update9(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     if (control.Yaw && Math.abs(game2.InputDelta["pad0_axis_3"]) > DEAD_ZONE) {
       let move2 = game2.World.Move[entity];
@@ -2049,41 +2215,8 @@
     }
   }
 
-  // ../src/components/com_render.ts
-  function render_colored_shaded(material, mesh, diffuse_color, shininess = 0, emission = 0, specular_rgb = [1, 1, 1], front_face = GL_CW) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 65536 /* Render */;
-      game2.World.Render[entity] = {
-        Kind: 1 /* ColoredShaded */,
-        Material: material,
-        Mesh: mesh,
-        Phase: diffuse_color[3] < 1 ? 1 /* Transparent */ : 0 /* Opaque */,
-        FrontFace: front_face,
-        DiffuseColor: diffuse_color,
-        SpecularColor: [...specular_rgb, shininess],
-        EmissiveColor: [diffuse_color[0], diffuse_color[1], diffuse_color[2], emission]
-      };
-    };
-  }
-  var FLOATS_PER_PARTICLE = 8;
-
-  // ../src/components/com_transform.ts
-  function transform(translation = [0, 0, 0], rotation2 = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 4194304 /* Transform */ | 256 /* Dirty */;
-      game2.World.Transform[entity] = {
-        World: create(),
-        Self: create(),
-        Translation: translation,
-        Rotation: rotation2,
-        Scale: scale2,
-        Gyroscope: false
-      };
-    };
-  }
-
   // ../src/systems/sys_draw.ts
-  var QUERY11 = 4194304 /* Transform */ | 512 /* Draw */;
+  var QUERY12 = 4194304 /* Transform */ | 512 /* Draw */;
   function sys_draw(game2, delta) {
     game2.Context2D.resetTransform();
     game2.Context2D.clearRect(0, 0, game2.ViewportWidth, game2.ViewportHeight);
@@ -2094,7 +2227,7 @@
       return;
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY11) == QUERY11) {
+      if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
         get_translation(position3, game2.World.Transform[i].World);
         transform_position(position3, position3, main_camera.Pv);
         if (position3[2] < -1 || position3[2] > 1) {
@@ -2125,39 +2258,39 @@
   }
 
   // ../src/systems/sys_lifespan.ts
-  var QUERY12 = 2048 /* Lifespan */;
+  var QUERY13 = 2048 /* Lifespan */;
   function sys_lifespan(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
-        update9(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY13) == QUERY13) {
+        update10(game2, i, delta);
       }
     }
   }
-  function update9(game2, entity, delta) {
-    let lifespan = game2.World.Lifespan[entity];
-    lifespan.Remaining -= delta;
-    if (lifespan.Remaining < 0) {
-      if (lifespan.Action) {
-        dispatch(game2, lifespan.Action, entity);
+  function update10(game2, entity, delta) {
+    let lifespan2 = game2.World.Lifespan[entity];
+    lifespan2.Remaining -= delta;
+    if (lifespan2.Remaining < 0) {
+      if (lifespan2.Action) {
+        dispatch(game2, lifespan2.Action, entity);
       }
       destroy_all(game2.World, entity);
     }
   }
 
   // ../src/systems/sys_light.ts
-  var QUERY13 = 4194304 /* Transform */ | 4096 /* Light */;
+  var QUERY14 = 4194304 /* Transform */ | 4096 /* Light */;
   function sys_light(game2, delta) {
     game2.LightPositions.fill(0);
     game2.LightDetails.fill(0);
     let counter = 0;
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY13) === QUERY13) {
-        update10(game2, i, counter++);
+      if ((game2.World.Signature[i] & QUERY14) === QUERY14) {
+        update11(game2, i, counter++);
       }
     }
   }
   var world_pos = [0, 0, 0];
-  function update10(game2, entity, idx) {
+  function update11(game2, entity, idx) {
     let light = game2.World.Light[entity];
     let transform2 = game2.World.Transform[entity];
     if (light.Kind === 2 /* Directional */) {
@@ -2176,10 +2309,10 @@
   }
 
   // ../src/systems/sys_mimic.ts
-  var QUERY14 = 4194304 /* Transform */ | 8192 /* Mimic */;
+  var QUERY15 = 4194304 /* Transform */ | 8192 /* Mimic */;
   function sys_mimic(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY14) === QUERY14) {
+      if ((game2.World.Signature[ent] & QUERY15) === QUERY15) {
         let follower_transform = game2.World.Transform[ent];
         let follower_mimic = game2.World.Mimic[ent];
         let target_transform = game2.World.Transform[follower_mimic.Target];
@@ -2193,16 +2326,16 @@
   }
 
   // ../src/systems/sys_move.ts
-  var QUERY15 = 4194304 /* Transform */ | 16384 /* Move */;
+  var QUERY16 = 4194304 /* Transform */ | 16384 /* Move */;
   var NO_ROTATION = [0, 0, 0, 1];
   function sys_move(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY15) === QUERY15) {
-        update11(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY16) === QUERY16) {
+        update12(game2, i, delta);
       }
     }
   }
-  function update11(game2, entity, delta) {
+  function update12(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let move2 = game2.World.Move[entity];
     if (move2.Direction[0] !== 0 || move2.Direction[1] !== 0 || move2.Direction[2] !== 0) {
@@ -2235,17 +2368,17 @@
   }
 
   // ../src/systems/sys_particles.ts
-  var QUERY16 = 4194304 /* Transform */ | 1024 /* EmitParticles */;
+  var QUERY17 = 4194304 /* Transform */ | 1024 /* EmitParticles */;
   function sys_particles(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY16) == QUERY16) {
-        update12(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY17) == QUERY17) {
+        update13(game2, i, delta);
       }
     }
   }
   var origin = [0, 0, 0];
   var forward3 = [0, 0, 0];
-  function update12(game2, entity, delta) {
+  function update13(game2, entity, delta) {
     let emitter = game2.World.EmitParticles[entity];
     let transform2 = game2.World.Transform[entity];
     emitter.SinceLast += delta;
@@ -2266,34 +2399,17 @@
     }
   }
 
-  // ../src/components/com_rigid_body.ts
-  function rigid_body(kind, bounciness = 0.5) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 131072 /* RigidBody */;
-      game2.World.RigidBody[entity] = {
-        Kind: kind,
-        ColliderId: entity,
-        Bounciness: bounciness,
-        Acceleration: [0, 0, 0],
-        VelocityIntegrated: [0, 0, 0],
-        VelocityResolved: [0, 0, 0],
-        LastPosition: [0, 0, 0],
-        IsAirborne: false
-      };
-    };
-  }
-
   // ../src/systems/sys_physics_integrate.ts
-  var QUERY17 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+  var QUERY18 = 4194304 /* Transform */ | 131072 /* RigidBody */;
   var GRAVITY = -9.81;
   function sys_physics_integrate(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY17) === QUERY17) {
-        update13(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
+        update14(game2, i, delta);
       }
     }
   }
-  function update13(game2, entity, delta) {
+  function update14(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (rigid_body2.Kind === 1 /* Dynamic */) {
@@ -2310,17 +2426,17 @@
   }
 
   // ../src/systems/sys_physics_kinematic.ts
-  var QUERY18 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+  var QUERY19 = 4194304 /* Transform */ | 131072 /* RigidBody */;
   function sys_physics_kinematic(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
-        update14(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY19) === QUERY19) {
+        update15(game2, i, delta);
       }
     }
   }
   var current_position = [0, 0, 0];
   var movement_delta = [0, 0, 0];
-  function update14(game2, entity, delta) {
+  function update15(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     get_translation(current_position, transform2.World);
@@ -2332,16 +2448,16 @@
   }
 
   // ../src/systems/sys_physics_resolve.ts
-  var QUERY19 = 4194304 /* Transform */ | 32 /* Collide */ | 131072 /* RigidBody */;
+  var QUERY20 = 4194304 /* Transform */ | 32 /* Collide */ | 131072 /* RigidBody */;
   function sys_physics_resolve(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY19) === QUERY19) {
-        update15(game2, i);
+      if ((game2.World.Signature[i] & QUERY20) === QUERY20) {
+        update16(game2, i);
       }
     }
   }
   var a = [0, 0, 0];
-  function update15(game2, entity) {
+  function update16(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     let collide2 = game2.World.Collide[rigid_body2.ColliderId];
@@ -2382,11 +2498,11 @@
   }
 
   // ../src/systems/sys_poll.ts
-  var QUERY20 = 1048576 /* Task */;
+  var QUERY21 = 1048576 /* Task */;
   function sys_poll(game2, delta) {
     let tasks_to_complete = [];
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY20) === QUERY20) {
+      if ((game2.World.Signature[i] & QUERY21) === QUERY21) {
         if (has_blocking_dependencies(game2.World, i)) {
           continue;
         }
@@ -2489,7 +2605,7 @@
   }
 
   // ../src/systems/sys_render_forward.ts
-  var QUERY21 = 4194304 /* Transform */ | 65536 /* Render */;
+  var QUERY22 = 4194304 /* Transform */ | 65536 /* Render */;
   function sys_render_forward(game2, delta) {
     for (let camera_entity of game2.Cameras) {
       let camera = game2.World.Camera[camera_entity];
@@ -2518,7 +2634,7 @@
     let current_front_face = null;
     let transparent_entities = [];
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY21) === QUERY21) {
+      if ((game2.World.Signature[ent] & QUERY22) === QUERY22) {
         let render = game2.World.Render[ent];
         if (render.Phase === 1 /* Transparent */) {
           transparent_entities.push(ent);
@@ -2748,7 +2864,7 @@
   }
 
   // ../src/systems/sys_resize.ts
-  var QUERY22 = 8 /* Camera */;
+  var QUERY23 = 8 /* Camera */;
   function sys_resize(game2, delta) {
     if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
       game2.ViewportResized = true;
@@ -2772,7 +2888,7 @@
         }
       }
       for (let i = 0; i < game2.World.Signature.length; i++) {
-        if ((game2.World.Signature[i] & QUERY22) === QUERY22) {
+        if ((game2.World.Signature[i] & QUERY23) === QUERY23) {
           let camera = game2.World.Camera[i];
           switch (camera.Kind) {
             case 0 /* Canvas */:
@@ -2801,15 +2917,15 @@
   }
 
   // ../src/systems/sys_shake.ts
-  var QUERY23 = 4194304 /* Transform */ | 262144 /* Shake */;
+  var QUERY24 = 4194304 /* Transform */ | 262144 /* Shake */;
   function sys_shake(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY23) == QUERY23) {
-        update16(game2, i);
+      if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
+        update17(game2, i);
       }
     }
   }
-  function update16(game2, entity) {
+  function update17(game2, entity) {
     let shake = game2.World.Shake[entity];
     let transform2 = game2.World.Transform[entity];
     transform2.Translation = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
@@ -2818,15 +2934,15 @@
   }
 
   // ../src/systems/sys_spawn.ts
-  var QUERY24 = 4194304 /* Transform */ | 524288 /* Spawn */;
+  var QUERY25 = 4194304 /* Transform */ | 524288 /* Spawn */;
   function sys_spawn(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
-        update17(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY25) == QUERY25) {
+        update18(game2, i, delta);
       }
     }
   }
-  function update17(game2, entity, delta) {
+  function update18(game2, entity, delta) {
     let spawn = game2.World.Spawn[entity];
     spawn.SinceLast += delta;
     if (spawn.SinceLast > spawn.Interval) {
@@ -2841,15 +2957,15 @@
   }
 
   // ../src/systems/sys_toggle.ts
-  var QUERY25 = 2097152 /* Toggle */;
+  var QUERY26 = 2097152 /* Toggle */;
   function sys_toggle(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY25) == QUERY25) {
-        update18(game2, i, delta);
+      if ((game2.World.Signature[i] & QUERY26) == QUERY26) {
+        update19(game2, i, delta);
       }
     }
   }
-  function update18(game2, entity, delta) {
+  function update19(game2, entity, delta) {
     let toggle = game2.World.Toggle[entity];
     toggle.SinceLast += delta;
     if (toggle.SinceLast > toggle.Frequency) {
@@ -2865,10 +2981,10 @@
   }
 
   // ../src/systems/sys_transform.ts
-  var QUERY26 = 4194304 /* Transform */ | 256 /* Dirty */;
+  var QUERY27 = 4194304 /* Transform */ | 256 /* Dirty */;
   function sys_transform(game2, delta) {
     for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-      if ((game2.World.Signature[ent] & QUERY26) === QUERY26) {
+      if ((game2.World.Signature[ent] & QUERY27) === QUERY27) {
         let transform2 = game2.World.Transform[ent];
         update_transform(game2.World, ent, transform2);
       }
@@ -2901,15 +3017,15 @@
   }
 
   // ../src/systems/sys_trigger.ts
-  var QUERY27 = 4194304 /* Transform */ | 32 /* Collide */ | 8388608 /* Trigger */;
+  var QUERY28 = 4194304 /* Transform */ | 32 /* Collide */ | 8388608 /* Trigger */;
   function sys_trigger(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY27) === QUERY27) {
-        update19(game2, i);
+      if ((game2.World.Signature[i] & QUERY28) === QUERY28) {
+        update20(game2, i);
       }
     }
   }
-  function update19(game2, entity) {
+  function update20(game2, entity) {
     let collide2 = game2.World.Collide[entity];
     let trigger = game2.World.Trigger[entity];
     for (let collision of collide2.Collisions) {
@@ -2985,7 +3101,7 @@
             "
         >
             <div>Collected: ${game2.ItemsCollected}</div>
-            <div>Missed: ${game2.ItemsMissed}</div>
+            <div>Distance: ${-game2.DistanceTraveled.toFixed(0)}</div>
         </div>
     `;
   }
@@ -3005,7 +3121,7 @@
   }
 
   // ../src/game.ts
-  var Game = class extends Game3D {
+  var Game2 = class extends Game3D {
     constructor() {
       super(...arguments);
       this.World = new World();
@@ -3016,7 +3132,8 @@
       this.LightPositions = new Float32Array(4 * MAX_FORWARD_LIGHTS);
       this.LightDetails = new Float32Array(4 * MAX_FORWARD_LIGHTS);
       this.ItemsCollected = 0;
-      this.ItemsMissed = 0;
+      this.DistanceTraveled = 0;
+      this.PlatformsTraveled = 0;
     }
     FixedUpdate(delta) {
       sys_physics_integrate(this, delta);
@@ -3036,6 +3153,7 @@
       sys_control_xbox(this, delta);
       sys_control_jump(this, delta);
       sys_control_always(this, delta);
+      sys_control_endless(this, delta);
       sys_animate(this, delta);
       sys_move(this, delta);
       sys_mimic(this, delta);
@@ -3093,49 +3211,6 @@
         camera_canvas(perspective(1, 0.1, 1e3), [0.1, 0.5, 0.8, 1])
       ])
     ];
-  }
-
-  // ../src/components/com_collide.ts
-  function collide(dynamic, layers, mask, size = [1, 1, 1]) {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 32 /* Collide */;
-      game2.World.Collide[entity] = {
-        EntityId: entity,
-        New: true,
-        Dynamic: dynamic,
-        Layers: layers,
-        Mask: mask,
-        Size: size,
-        Min: [0, 0, 0],
-        Max: [0, 0, 0],
-        Center: [0, 0, 0],
-        Half: [0, 0, 0],
-        Collisions: []
-      };
-    };
-  }
-
-  // ../src/blueprints/blu_ground.ts
-  function blueprint_ground(game2) {
-    return [
-      collide(false, 2 /* Terrain */, 0 /* None */),
-      rigid_body(0 /* Static */),
-      children([
-        transform([0, float(0, 0.1), 0]),
-        render_colored_shaded(game2.MaterialColoredShaded, game2.MeshCube, [0, 1, 0.1, 1])
-      ])
-    ];
-  }
-
-  // ../common/easing.ts
-  function ease_in_quad(t) {
-    return t * t;
-  }
-  function ease_out_quad(t) {
-    return 1 - (1 - t) ** 2;
-  }
-  function ease_in_out_quad(t) {
-    return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
   }
 
   // ../src/components/com_audio_listener.ts
@@ -3280,33 +3355,24 @@
   function scene_run(game2) {
     game2.World = new World();
     game2.ViewportResized = true;
-    let map_width = 3;
-    let map_length = 100;
-    let tile_size = 5;
-    for (let z = 0; z < map_length; z++) {
-      for (let x = 0; x < map_width; x++) {
-        if (float() > 0.1) {
-          instantiate(game2, [
-            ...blueprint_ground(game2),
-            transform([tile_size * (x - map_width / 2), 0, tile_size * -z], void 0, [
-              tile_size,
-              1,
-              tile_size
-            ])
-          ]);
-        }
-      }
-    }
+    instantiate(game2, [...blueprint_player(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
+    instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
     instantiate(game2, [
       transform(void 0, from_euler([0, 0, 0, 1], -30, 30, 0)),
       light_directional([1, 1, 1], 0.1)
     ]);
-    instantiate(game2, [...blueprint_player(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
-    instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
+    let map_length = 11;
+    let tile_size = 10;
+    for (let z = 0; z < map_length; z++) {
+      instantiate(game2, [
+        ...blueprint_ground(game2),
+        transform([0, 0, tile_size * -z], void 0, [tile_size, 1, tile_size])
+      ]);
+    }
   }
 
   // ../src/index.ts
-  var game = new Game();
+  var game = new Game2();
   scene_run(game);
   game.Start();
   window.$ = dispatch.bind(null, game);
