@@ -5,6 +5,7 @@ import {audio_listener} from "../components/com_audio_listener.js";
 import {audio_source} from "../components/com_audio_source.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
+import {control_always} from "../components/com_control_always.js";
 import {control_player} from "../components/com_control_player.js";
 import {light_point} from "../components/com_light.js";
 import {move} from "../components/com_move.js";
@@ -16,8 +17,9 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_player(game: Game) {
     return [
-        control_player(true, 0.2, 0),
-        move(10, 3),
+        control_player(false, 0.2, 0),
+        control_always([0, 0, 1], null),
+        move(20, 3),
         collide(true, Layer.Player, Layer.Terrain),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
