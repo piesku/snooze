@@ -1,8 +1,10 @@
 import {ease_in_out_quad, ease_in_quad, ease_out_quad} from "../../common/easing.js";
 import {from_euler} from "../../common/quat.js";
+import {Entity} from "../../common/world.js";
 import {animate, AnimationFlag} from "../components/com_animate.js";
 import {audio_listener} from "../components/com_audio_listener.js";
 import {audio_source} from "../components/com_audio_source.js";
+import {callback} from "../components/com_callback.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
 import {control_always} from "../components/com_control_always.js";
@@ -19,7 +21,9 @@ import {Has} from "../world.js";
 import {blueprint_spawner} from "./blu_spawner.js";
 
 export function blueprint_player(game: Game) {
+    let player: Entity;
     return [
+        callback((game, entity) => (player = entity)),
         control_player(true, 0.2, 0),
         control_always([0, 0, 1], null, "move"),
         disable(Has.ControlAlways),
@@ -30,26 +34,34 @@ export function blueprint_player(game: Game) {
         audio_listener(),
         children(
             [
-                transform(),
                 task_when(
                     () => game.PlayState === "playing",
                     (entity) => {
-                        let parent = game.World.Transform[entity].Parent!;
-                        game.World.Signature[parent] |= Has.ControlAlways;
+                        game.World.Signature[player] |= Has.ControlAlways;
                     }
                 ),
             ],
             [
-                transform(),
                 task_when(
                     () => game.PlayState === "win",
                     (entity) => {
-                        let parent = game.World.Transform[entity].Parent!;
-                        game.World.Signature[parent] &= ~Has.ControlPlayer;
+                        game.World.Signature[player] &= ~Has.ControlPlayer;
 
-                        let control_always = game.World.ControlAlways[parent];
+                        let control_always = game.World.ControlAlways[player];
                         control_always.Direction = null;
                         control_always.Animation = "jump";
+                    }
+                ),
+            ],
+            [
+                task_when(
+                    () => game.PlayState === "lose",
+                    (entity) => {
+                        game.World.Signature[player] &= ~Has.ControlPlayer;
+
+                        let control_always = game.World.ControlAlways[player];
+                        control_always.Direction = null;
+                        control_always.Animation = undefined;
                     }
                 ),
             ],
@@ -182,7 +194,11 @@ export function blueprint_player(game: Game) {
                 move(0, 3),
                 control_player(false, 0, 0.2, -2, 15),
             ],
-            [named("hand spawner anchor"), transform([0, 50, 40]), ...blueprint_spawner(game)]
+            [
+                named("lose camera anchor"),
+                transform([0, 30, 50], from_euler([0, 0, 0, 1], 30, -155, 0)),
+            ],
+            [named("hand spawner anchor"), transform([0, 50, 30]), ...blueprint_spawner(game)]
         ),
     ];
 }

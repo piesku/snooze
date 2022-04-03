@@ -1,4 +1,6 @@
 import {perspective} from "../../common/projection.js";
+import {Entity} from "../../common/world.js";
+import {callback} from "../components/com_callback.js";
 import {camera_canvas} from "../components/com_camera.js";
 import {children} from "../components/com_children.js";
 import {mimic} from "../components/com_mimic.js";
@@ -8,7 +10,9 @@ import {transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 
 export function blueprint_camera_follow(game: Game) {
+    let camera: Entity;
     return [
+        callback((game, entity) => (camera = entity)),
         mimic(first_named(game.World, "title camera anchor")),
         children(
             [
@@ -16,23 +20,27 @@ export function blueprint_camera_follow(game: Game) {
                 camera_canvas(perspective(1, 0.1, 1000), [170 / 255, 199 / 255, 172 / 255, 1]),
             ],
             [
-                transform(),
                 task_when(
                     () => game.PlayState === "playing",
                     (entity) => {
                         // The camera follows the player.
-                        let parent = game.World.Transform[entity].Parent!;
-                        mimic(first_named(game.World, "player camera anchor"))(game, parent);
+                        mimic(first_named(game.World, "player camera anchor"))(game, camera);
                     }
                 ),
             ],
             [
-                transform(),
                 task_when(
                     () => game.PlayState === "win",
                     (entity) => {
-                        let parent = game.World.Transform[entity].Parent!;
-                        mimic(first_named(game.World, "title camera anchor"))(game, parent);
+                        mimic(first_named(game.World, "title camera anchor"))(game, camera);
+                    }
+                ),
+            ],
+            [
+                task_when(
+                    () => game.PlayState === "lose",
+                    (entity) => {
+                        mimic(first_named(game.World, "lose camera anchor"))(game, camera);
                     }
                 ),
             ]

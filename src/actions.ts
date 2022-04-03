@@ -8,6 +8,7 @@ export const enum Action {
     GameTitle,
     GameStart,
     CollectItem,
+    Snooze,
 }
 
 export function dispatch(game: Game, action: Action, payload: unknown) {
@@ -40,6 +41,17 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
                 }
             }
             destroy_all(game.World, item_entity);
+            break;
+        }
+        case Action.Snooze: {
+            let [hand_entity, other_entity] = payload as [Entity, Entity];
+            let other_collide = game.World.Collide[other_entity];
+            if (other_collide.Layers & Layer.Player) {
+                game.PlayState = "lose";
+            } else {
+                let hand_collide = game.World.Collide[hand_entity];
+                hand_collide.Mask &= ~Layer.Player;
+            }
             break;
         }
     }
