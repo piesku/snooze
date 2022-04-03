@@ -29,7 +29,7 @@ export function blueprint_player(game: Game) {
                 game.World.Signature[entity] |= Has.ControlAlways;
             }
         ),
-        move(10, 3),
+        move(2, 3),
         collide(true, Layer.Player, Layer.Terrain),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
@@ -66,12 +66,12 @@ export function blueprint_player(game: Game) {
                                 Rotation: [0, 0, 0, 1],
                             },
                             {
-                                Timestamp: 0.5,
+                                Timestamp: 0.3,
                                 Rotation: [1, 0, 0, 0],
                                 Ease: ease_in_quad,
                             },
                             {
-                                Timestamp: 1,
+                                Timestamp: 0.6,
                                 Rotation: [0, 0, 0, -1],
                                 Ease: ease_out_quad,
                             },
@@ -155,10 +155,14 @@ export function blueprint_player(game: Game) {
                 ),
             ],
             [
+                named("title camera anchor"),
+                transform([-3, 0, 0], from_euler([0, 0, 0, 1], 0, -155, 0)),
+            ],
+            [
                 named("player camera anchor"),
                 transform(undefined, from_euler([0, 0, 0, 1], 15, 0, 0)),
                 move(0, 3),
-                control_player(false, 0, 0.2, -10, 15),
+                control_player(false, 0, 0.2, -2, 15),
             ],
             [named("hand spawner anchor"), transform([0, 25, 25]), ...blueprint_spawner(game)]
         ),

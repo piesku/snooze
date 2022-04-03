@@ -21,7 +21,7 @@ function update(game: Game, entity: Entity) {
         if (game.InputState["ArrowUp"]) {
             // Jump
             if (!rigid_body.IsAirborne) {
-                rigid_body.Acceleration[1] += 300;
+                rigid_body.Acceleration[1] += 200;
 
                 for (let ent of query_down(game.World, entity, Has.Animate)) {
                     game.World.Animate[ent].Trigger = "jump";

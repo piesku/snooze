@@ -1,0 +1,86 @@
+#!/usr/bin/env node
+
+const {readFileSync} = require("fs");
+
+if (process.argv.length !== 3) {
+    console.error("Provide a GLTF file on stdin and the name of the scene:");
+    console.error("  cat foo.gltf | node gltf2map.cjs foo");
+    process.exit(1);
+}
+
+function float(min = 0, max = 1) {
+    return Math.random() * (max - min) + min;
+}
+
+process.stdin.resume();
+let json = readFileSync(process.stdin.fd, "utf8");
+process.stdin.pause();
+
+let scene_name = process.argv[2]
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+
+let vec = (arr) =>
+    arr ? "[" + arr.map((v) => parseFloat(v.toFixed(2))).join(", ") + "]" : "undefined";
+
+let imports = new Set([
+    'import {instantiate} from "../../common/game.js";',
+    'import {collide} from "../components/com_collide.js";',
+    'import {render_colored_shadows} from "../components/com_render.js";',
+    'import {RigidKind, rigid_body} from "../components/com_rigid_body.js";',
+    'import {transform} from "../components/com_transform.js";',
+    'import {Game, Layer} from "../game.js";',
+]);
+
+let create_instance = (name, translation, rotation, scale) => {
+    switch (name) {
+        case "player":
+            imports.add('import {blueprint_player} from "../blueprints/blu_player.js";');
+            return `
+    // Player.
+    instantiate(game, [
+        ...blueprint_player(game),
+        transform(${vec(translation)}, [0, 1, 0, 0], [0.1, 0.1, 0.1]),
+    ]);`;
+        case "cube":
+            return `
+    instantiate(game, [
+        transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
+        collide(false, Layer.Terrain, Layer.None),
+        rigid_body(RigidKind.Static),
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            221 / 0xff,
+            157 / 0xff,
+            105 / 0xff,
+            1,
+        ]),
+    ]);`;
+        default:
+            throw new Error("Unknown object: " + name);
+    }
+};
+
+let gltf = JSON.parse(json);
+let nodes = gltf.nodes
+    .map((node) =>
+        create_instance(
+            node.name.toLowerCase().split(".")[0],
+            node.translation,
+            node.rotation,
+            node.scale
+        )
+    )
+    .join("\n");
+
+let result = `\
+${Array.from(imports).join("\n")}
+
+export function map_${scene_name}(game: Game) {
+${nodes}
+}`;
+
+console.log(result);

@@ -9,7 +9,7 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_hand(game: Game) {
     return [
-        collide(true, Layer.Obstacle, Layer.Terrain | Layer.Player),
+        collide(true, Layer.Obstacle, Layer.Terrain | Layer.Player, [0.4, 0.2, 0.6]),
         rigid_body(RigidKind.Dynamic, 0.3),
         callback((game, entity) => {
             let rigid_body = game.World.RigidBody[entity];
@@ -17,7 +17,7 @@ export function blueprint_hand(game: Game) {
         }),
         lifespan(10),
         children([
-            transform(),
+            transform(undefined, undefined, [5, 5, 5]),
             render_colored_shadows(game.MaterialColoredShadows, game.MeshHand, [
                 242 / 0xff,
                 194 / 0xff,
