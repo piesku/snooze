@@ -4,8 +4,8 @@ import {Game} from "./game.js";
 
 export const enum Action {
     ToggleFullscreen,
+    GameStart,
     CollectItem,
-    ExpireItem,
 }
 
 export function dispatch(game: Game, action: Action, payload: unknown) {
@@ -16,6 +16,10 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
             } else {
                 document.body.requestFullscreen();
             }
+            break;
+        }
+        case Action.GameStart: {
+            game.PlayState = "playing";
             break;
         }
         case Action.CollectItem: {

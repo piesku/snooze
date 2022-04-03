@@ -59,6 +59,8 @@ export class Game extends Game3D {
         Sun: create_depth_target(this.Gl, 4096, 4096),
     };
 
+    PlayState: "title" | "playing" | "win" | "lose" = "title";
+
     ItemsCollected = 0;
     DistanceTraveled = 0;
     PlatformsTraveled = 0;
@@ -82,12 +84,12 @@ export class Game extends Game3D {
         sys_resize(this, delta);
         sys_camera(this, delta);
 
+        // AI.
+        sys_control_always(this, delta);
+
         // Player input.
         sys_control_keyboard(this, delta);
         sys_control_jump(this, delta);
-
-        // AI.
-        sys_control_always(this, delta);
 
         // Game logic.
         sys_animate(this, delta);

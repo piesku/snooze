@@ -8,7 +8,7 @@ import {Game} from "../game.js";
 
 export function blueprint_camera_follow(game: Game) {
     return [
-        mimic(first_named(game.World, "camera anchor")),
+        mimic(first_named(game.World, "title camera anchor")),
         children([
             transform([0, 1, -6], [0, 1, 0, 0]),
             camera_canvas(perspective(1, 0.1, 1000), [170 / 255, 199 / 255, 172 / 255, 1]),
