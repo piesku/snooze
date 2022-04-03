@@ -81,7 +81,11 @@ let create_instance = (name, translation, rotation, scale) => {
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, ${color(
+            221,
+            157,
+            105
+        )}),
         cull(Has.Render),
     ]);`;
         default:
