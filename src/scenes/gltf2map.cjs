@@ -44,7 +44,7 @@ let create_instance = (name, translation, rotation, scale) => {
     // Player.
     instantiate(game, [
         ...blueprint_player(game),
-        transform(${vec(translation)}, [0, 1, 0, 0], [0.1, 0.1, 0.1]),
+        transform(${vec(translation)}, [0, 1, 0, 0], [0.05, 0.05, 0.05]),
     ]);`;
         case "cube":
             return `

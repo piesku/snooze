@@ -29,15 +29,15 @@ export function blueprint_player(game: Game) {
                 game.World.Signature[entity] |= Has.ControlAlways;
             }
         ),
-        move(2, 3),
-        collide(true, Layer.Player, Layer.Terrain),
+        move(1.5, 3),
+        collide(true, Layer.Player, Layer.Terrain, [2.8, 2.6, 2]),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
         audio_listener(),
         children(
             // Body.
             [
-                transform([0, 0.75, 0]),
+                transform(),
                 render_colored_shadows(game.MaterialColoredShadows, game.MeshBody, [
                     224 / 0xff,
                     114 / 0xff,
@@ -104,7 +104,7 @@ export function blueprint_player(game: Game) {
             ],
             // Axel.
             [
-                transform([0, 0.75, 0]),
+                transform(),
                 animate({
                     idle: {
                         Flags: AnimationFlag.None,
@@ -164,7 +164,7 @@ export function blueprint_player(game: Game) {
                 move(0, 3),
                 control_player(false, 0, 0.2, -2, 15),
             ],
-            [named("hand spawner anchor"), transform([0, 25, 25]), ...blueprint_spawner(game)]
+            [named("hand spawner anchor"), transform([0, 50, 40]), ...blueprint_spawner(game)]
         ),
     ];
 }

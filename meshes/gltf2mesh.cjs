@@ -8,7 +8,7 @@ if (process.argv.length !== 3) {
     process.exit(1);
 }
 
-const DEC = 2;
+const DEC = 4;
 process.stdin.resume();
 let json = readFileSync(process.stdin.fd, "utf8");
 process.stdin.pause();

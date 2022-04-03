@@ -1,10 +1,10 @@
 import {instantiate} from "../../common/game.js";
-import {blueprint_player} from "../blueprints/blu_player.js";
 import {collide} from "../components/com_collide.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
+import {blueprint_player} from "../blueprints/blu_player.js";
 
 export function map_room1(game: Game) {
     instantiate(game, [
@@ -58,6 +58,6 @@ export function map_room1(game: Game) {
     // Player.
     instantiate(game, [
         ...blueprint_player(game),
-        transform([-2.5, 1, 4.4], [0, 1, 0, 0], [0.1, 0.1, 0.1]),
+        transform([-2.5, 1, 4.4], [0, 1, 0, 0], [0.05, 0.05, 0.05]),
     ]);
 }
