@@ -36,6 +36,16 @@ let imports = new Set([
     'import {Game, Layer} from "../game.js";',
 ]);
 
+function color(r, g, b) {
+    let m = 15;
+    return `[
+            ${float(r - m, r + m)} / 0xff,
+            ${float(g - m, g + m)} / 0xff,
+            ${float(b - m, b + m)} / 0xff,
+            1
+        ]`;
+}
+
 let create_instance = (name, translation, rotation, scale) => {
     switch (name) {
         case "player":
@@ -52,7 +62,15 @@ let create_instance = (name, translation, rotation, scale) => {
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
+    ]);`;
+        case "cylinder":
+            return `
+    instantiate(game, [
+        transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
+        collide(false, Layer.Terrain, Layer.None),
+        rigid_body(RigidKind.Static),
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
             221 / 0xff,
             157 / 0xff,
             105 / 0xff,

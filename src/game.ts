@@ -7,6 +7,7 @@ import {mat_forward_depth} from "../materials/mat_forward_depth.js";
 import {mat_forward_particles_colored} from "../materials/mat_forward_particles_colored.js";
 import {mesh_body} from "../meshes/body.js";
 import {mesh_cube} from "../meshes/cube.js";
+import {mesh_cylinder} from "../meshes/cylinder.js";
 import {mesh_hand} from "../meshes/hand.js";
 import {mesh_wheel} from "../meshes/wheel.js";
 import {sys_animate} from "./systems/sys_animate.js";
@@ -48,6 +49,7 @@ export class Game extends Game3D {
     MaterialDepth = mat_forward_depth(this.Gl);
 
     MeshCube = mesh_cube(this.Gl);
+    MeshCylinder = mesh_cylinder(this.Gl);
     MeshBody = mesh_body(this.Gl);
     MeshWheel = mesh_wheel(this.Gl);
     MeshHand = mesh_hand(this.Gl);
