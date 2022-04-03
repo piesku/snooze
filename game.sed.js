@@ -228,9 +228,9 @@ this.InputDistance["Touch1"] = 0;
 for (let name in this.InputDelta) {
 this.InputDelta[name] = 0;
 }
-let update18 = performance.now() - this.Now;
+let update19 = performance.now() - this.Now;
 if (update_span) {
-update_span.textContent = update18.toFixed(1);
+update_span.textContent = update19.toFixed(1);
 }
 if (delta_span) {
 delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -310,6 +310,7 @@ this.Children = [];
 this.Collide = [];
 this.ControlAlways = [];
 this.ControlPlayer = [];
+this.Cull = [];
 this.Draw = [];
 this.EmitParticles = [];
 this.Lifespan = [];
@@ -520,17 +521,13 @@ var vertex = `#version 300 es
 
 uniform mat4 pv;
 uniform mat4 world;
-uniform mat4 self;
 
 layout(location=${0 /* Position */}) in vec4 attr_position;
-layout(location=${1 /* Normal */}) in vec3 attr_normal;
 
 out vec4 vert_position;
-out vec3 vert_normal;
 
 void main() {
 vert_position = world * attr_position;
-vert_normal = (vec4(attr_normal, 0.0) * self).xyz;
 gl_Position = pv * vert_position;
 }
 `;
@@ -539,17 +536,11 @@ var fragment = `#version 300 es
 precision mediump float;
 precision lowp sampler2DShadow;
 
-uniform vec3 eye;
 uniform vec4 diffuse_color;
-uniform vec4 specular_color;
-uniform vec4 emissive_color;
-uniform vec4 light_positions[${MAX_FORWARD_LIGHTS}];
-uniform vec4 light_details[${MAX_FORWARD_LIGHTS}];
 uniform mat4 shadow_space;
 uniform sampler2DShadow shadow_map;
 
 in vec4 vert_position;
-in vec3 vert_normal;
 
 out vec4 frag_color;
 
@@ -570,59 +561,9 @@ return texture(shadow_map, shadow_space_ndc) * (1.0 - min) + min;
 }
 
 void main() {
-vec3 world_normal = normalize(vert_normal);
-
-vec3 view_dir = eye - vert_position.xyz;
-vec3 view_normal = normalize(view_dir);
-
-
-vec3 light_acc = GAMMA_DECODE(diffuse_color.rgb);
-
-for (int i = 0; i < 0; i++) {
-int light_kind = int(light_positions[i].w);
-if (light_kind == ${0 /* Inactive */}) {
-break;
-}
-
-vec3 light_rgb = GAMMA_DECODE(light_details[i].rgb);
-float light_intensity = light_details[i].a;
-
-vec3 light_normal;
-if (light_kind == ${2 /* Directional */}) {
-light_normal = light_positions[i].xyz;
-} else if (light_kind == ${3 /* Point */}) {
-vec3 light_dir = light_positions[i].xyz - vert_position.xyz;
-float light_dist = length(light_dir);
-light_normal = light_dir / light_dist;
-
-light_intensity /= (light_dist * light_dist);
-}
-
-float diffuse_factor = dot(world_normal, light_normal);
-if (diffuse_factor > 0.0) {
-
-light_acc += GAMMA_DECODE(diffuse_color.rgb) * diffuse_factor * light_rgb * light_intensity;
-
-if (specular_color.a > 0.0) {
-
-
-
-
-
-
-vec3 h = normalize(light_normal + view_normal);
-float specular_angle = max(dot(h, world_normal), 0.0);
-float specular_factor = pow(specular_angle, specular_color.a);
-
-
-light_acc += GAMMA_DECODE(specular_color.rgb) * specular_factor * light_rgb * light_intensity;
-}
-}
-}
-
-vec3 emissive_rgb = GAMMA_DECODE(emissive_color.rgb) * emissive_color.a;
-vec3 shaded_rgb = light_acc * shadow_factor(vert_position, 0.5);
-frag_color= vec4(GAMMA_ENCODE(shaded_rgb + emissive_rgb), diffuse_color.a);
+vec3 diffuse_rgb = GAMMA_DECODE(diffuse_color.rgb);
+vec3 shaded_rgb = diffuse_rgb * shadow_factor(vert_position, 0.5);
+frag_color= vec4(GAMMA_ENCODE(shaded_rgb), diffuse_color.a);
 }
 `;
 function mat_forward_colored_shadows(gl) {
@@ -633,13 +574,7 @@ Program: program,
 Locations: {
 Pv: gl.getUniformLocation(program, "pv"),
 World: gl.getUniformLocation(program, "world"),
-Self: gl.getUniformLocation(program, "self"),
-DiffuseColor: gl.getUniformLocation(program, "diffuse_color"),
-SpecularColor: gl.getUniformLocation(program, "specular_color"),
-EmissiveColor: gl.getUniformLocation(program, "emissive_color"),
-Eye: gl.getUniformLocation(program, "eye"),
-LightPositions: gl.getUniformLocation(program, "light_positions"),
-LightDetails: gl.getUniformLocation(program, "light_details"),
+Color: gl.getUniformLocation(program, "diffuse_color"),
 ShadowSpace: gl.getUniformLocation(program, "shadow_space"),
 ShadowMap: gl.getUniformLocation(program, "shadow_map")
 }
@@ -4699,7 +4634,7 @@ var index_arr2 = Uint16Array.from([
 ]);
 
 
-function mesh_hand(gl) {
+function mesh_cylinder(gl) {
 let vao = gl.createVertexArray();
 gl.bindVertexArray(vao);
 let vertex_buf = gl.createBuffer();
@@ -4742,6 +4677,238 @@ IndexCount: index_arr3.length
 };
 }
 var vertex_arr3 = Float32Array.from([
+0,
+-0.5,
+-0.5,
+0,
+0.5,
+-0.5,
+0.3536,
+-0.5,
+-0.3536,
+0.3536,
+0.5,
+-0.3536,
+0.5,
+-0.5,
+0,
+0.5,
+0.5,
+0,
+0.3536,
+-0.5,
+0.3536,
+0.3536,
+0.5,
+0.3536,
+-0,
+-0.5,
+0.5,
+-0,
+0.5,
+0.5,
+-0.3536,
+-0.5,
+0.3536,
+-0.3536,
+0.5,
+0.3536,
+-0.5,
+-0.5,
+-0,
+-0.5,
+0.5,
+-0,
+-0.3536,
+-0.5,
+-0.3536,
+-0.3536,
+0.5,
+-0.3536
+]);
+var normal_arr3 = Float32Array.from([
+0,
+-0.6302,
+-0.7764,
+0,
+0.6302,
+-0.7764,
+0.549,
+-0.6302,
+-0.549,
+0.549,
+0.6302,
+-0.549,
+0.7764,
+-0.6302,
+0,
+0.7764,
+0.6302,
+0,
+0.549,
+-0.6302,
+0.549,
+0.549,
+0.6302,
+0.549,
+0,
+-0.6302,
+0.7764,
+0,
+0.6302,
+0.7764,
+-0.549,
+-0.6302,
+0.549,
+-0.549,
+0.6302,
+0.549,
+-0.7764,
+-0.6302,
+0,
+-0.7764,
+0.6302,
+0,
+-0.549,
+-0.6302,
+-0.549,
+-0.549,
+0.6302,
+-0.549
+]);
+var texcoord_arr3 = Float32Array.from([]);
+var weights_arr3 = Float32Array.from([]);
+var index_arr3 = Uint16Array.from([
+14,
+10,
+6,
+6,
+2,
+14,
+14,
+12,
+10,
+10,
+8,
+6,
+6,
+4,
+2,
+2,
+0,
+14,
+0,
+1,
+14,
+1,
+15,
+14,
+14,
+15,
+12,
+15,
+13,
+12,
+5,
+9,
+13,
+13,
+1,
+5,
+5,
+7,
+9,
+9,
+11,
+13,
+13,
+15,
+1,
+1,
+3,
+5,
+12,
+13,
+10,
+13,
+11,
+10,
+10,
+11,
+8,
+11,
+9,
+8,
+8,
+9,
+6,
+9,
+7,
+6,
+6,
+7,
+4,
+7,
+5,
+4,
+4,
+5,
+2,
+5,
+3,
+2,
+2,
+3,
+0,
+3,
+1,
+0
+]);
+
+
+function mesh_hand(gl) {
+let vao = gl.createVertexArray();
+gl.bindVertexArray(vao);
+let vertex_buf = gl.createBuffer();
+gl.bindBuffer(GL_ARRAY_BUFFER, vertex_buf);
+gl.bufferData(GL_ARRAY_BUFFER, vertex_arr4, GL_STATIC_DRAW);
+gl.enableVertexAttribArray(0 /* Position */);
+gl.vertexAttribPointer(0 /* Position */, 3, GL_FLOAT, false, 0, 0);
+let normal_buf = gl.createBuffer();
+gl.bindBuffer(GL_ARRAY_BUFFER, normal_buf);
+gl.bufferData(GL_ARRAY_BUFFER, normal_arr4, GL_STATIC_DRAW);
+gl.enableVertexAttribArray(1 /* Normal */);
+gl.vertexAttribPointer(1 /* Normal */, 3, GL_FLOAT, false, 0, 0);
+let texcoord_buf = gl.createBuffer();
+gl.bindBuffer(GL_ARRAY_BUFFER, texcoord_buf);
+gl.bufferData(GL_ARRAY_BUFFER, texcoord_arr4, GL_STATIC_DRAW);
+gl.enableVertexAttribArray(2 /* TexCoord */);
+gl.vertexAttribPointer(2 /* TexCoord */, 2, GL_FLOAT, false, 0, 0);
+let weights_buf = gl.createBuffer();
+gl.bindBuffer(GL_ARRAY_BUFFER, weights_buf);
+gl.bufferData(GL_ARRAY_BUFFER, weights_arr4, GL_STATIC_DRAW);
+gl.enableVertexAttribArray(5 /* Weights */);
+gl.vertexAttribPointer(5 /* Weights */, 4, GL_FLOAT, false, 0, 0);
+let index_buf = gl.createBuffer();
+gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buf);
+gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, index_arr4, GL_STATIC_DRAW);
+gl.bindVertexArray(null);
+return {
+Vao: vao,
+VertexBuffer: vertex_buf,
+VertexArray: vertex_arr4,
+NormalBuffer: normal_buf,
+NormalArray: normal_arr4,
+TexCoordBuffer: texcoord_buf,
+TexCoordArray: texcoord_arr4,
+WeightsBuffer: weights_buf,
+WeightsArray: weights_arr4,
+IndexBuffer: index_buf,
+IndexArray: index_arr4,
+IndexCount: index_arr4.length
+};
+}
+var vertex_arr4 = Float32Array.from([
 -0.0347,
 -26e-4,
 -0.0493,
@@ -11025,7 +11192,7 @@ var vertex_arr3 = Float32Array.from([
 2e-3,
 -0.0186
 ]);
-var normal_arr3 = Float32Array.from([
+var normal_arr4 = Float32Array.from([
 -0.5035,
 -0.7559,
 0.4184,
@@ -17309,7 +17476,7 @@ var normal_arr3 = Float32Array.from([
 0.6709,
 -0.6869
 ]);
-var texcoord_arr3 = Float32Array.from([
+var texcoord_arr4 = Float32Array.from([
 0.1999,
 0.2854,
 0.1999,
@@ -21499,8 +21666,8 @@ var texcoord_arr3 = Float32Array.from([
 0.6142,
 0.5255
 ]);
-var weights_arr3 = Float32Array.from([]);
-var index_arr3 = Uint16Array.from([
+var weights_arr4 = Float32Array.from([]);
+var index_arr4 = Uint16Array.from([
 2032,
 1916,
 1945,
@@ -23819,44 +23986,44 @@ let vao = gl.createVertexArray();
 gl.bindVertexArray(vao);
 let vertex_buf = gl.createBuffer();
 gl.bindBuffer(GL_ARRAY_BUFFER, vertex_buf);
-gl.bufferData(GL_ARRAY_BUFFER, vertex_arr4, GL_STATIC_DRAW);
+gl.bufferData(GL_ARRAY_BUFFER, vertex_arr5, GL_STATIC_DRAW);
 gl.enableVertexAttribArray(0 /* Position */);
 gl.vertexAttribPointer(0 /* Position */, 3, GL_FLOAT, false, 0, 0);
 let normal_buf = gl.createBuffer();
 gl.bindBuffer(GL_ARRAY_BUFFER, normal_buf);
-gl.bufferData(GL_ARRAY_BUFFER, normal_arr4, GL_STATIC_DRAW);
+gl.bufferData(GL_ARRAY_BUFFER, normal_arr5, GL_STATIC_DRAW);
 gl.enableVertexAttribArray(1 /* Normal */);
 gl.vertexAttribPointer(1 /* Normal */, 3, GL_FLOAT, false, 0, 0);
 let texcoord_buf = gl.createBuffer();
 gl.bindBuffer(GL_ARRAY_BUFFER, texcoord_buf);
-gl.bufferData(GL_ARRAY_BUFFER, texcoord_arr4, GL_STATIC_DRAW);
+gl.bufferData(GL_ARRAY_BUFFER, texcoord_arr5, GL_STATIC_DRAW);
 gl.enableVertexAttribArray(2 /* TexCoord */);
 gl.vertexAttribPointer(2 /* TexCoord */, 2, GL_FLOAT, false, 0, 0);
 let weights_buf = gl.createBuffer();
 gl.bindBuffer(GL_ARRAY_BUFFER, weights_buf);
-gl.bufferData(GL_ARRAY_BUFFER, weights_arr4, GL_STATIC_DRAW);
+gl.bufferData(GL_ARRAY_BUFFER, weights_arr5, GL_STATIC_DRAW);
 gl.enableVertexAttribArray(5 /* Weights */);
 gl.vertexAttribPointer(5 /* Weights */, 4, GL_FLOAT, false, 0, 0);
 let index_buf = gl.createBuffer();
 gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buf);
-gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, index_arr4, GL_STATIC_DRAW);
+gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, index_arr5, GL_STATIC_DRAW);
 gl.bindVertexArray(null);
 return {
 Vao: vao,
 VertexBuffer: vertex_buf,
-VertexArray: vertex_arr4,
+VertexArray: vertex_arr5,
 NormalBuffer: normal_buf,
-NormalArray: normal_arr4,
+NormalArray: normal_arr5,
 TexCoordBuffer: texcoord_buf,
-TexCoordArray: texcoord_arr4,
+TexCoordArray: texcoord_arr5,
 WeightsBuffer: weights_buf,
-WeightsArray: weights_arr4,
+WeightsArray: weights_arr5,
 IndexBuffer: index_buf,
-IndexArray: index_arr4,
-IndexCount: index_arr4.length
+IndexArray: index_arr5,
+IndexCount: index_arr5.length
 };
 }
-var vertex_arr4 = Float32Array.from([
+var vertex_arr5 = Float32Array.from([
 -0.3,
 0,
 -1.0454,
@@ -25154,7 +25321,7 @@ var vertex_arr4 = Float32Array.from([
 1.0607,
 -0.7392
 ]);
-var normal_arr4 = Float32Array.from([
+var normal_arr5 = Float32Array.from([
 -1,
 0,
 0,
@@ -26452,7 +26619,7 @@ var normal_arr4 = Float32Array.from([
 0.151,
 -0.0626
 ]);
-var texcoord_arr4 = Float32Array.from([
+var texcoord_arr5 = Float32Array.from([
 0.75,
 0.5827,
 0.75,
@@ -27318,8 +27485,8 @@ var texcoord_arr4 = Float32Array.from([
 0.0621,
 0.6242
 ]);
-var weights_arr4 = Float32Array.from([]);
-var index_arr4 = Uint16Array.from([
+var weights_arr5 = Float32Array.from([]);
+var index_arr5 = Uint16Array.from([
 378,
 270,
 162,
@@ -28237,7 +28404,7 @@ return AnimationFlag2;
 })(AnimationFlag || {});
 
 
-var QUERY = 4194304 /* Transform */ | 1 /* Animate */;
+var QUERY = 8388608 /* Transform */ | 1 /* Animate */;
 function sys_animate(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY) === QUERY) {
@@ -28279,15 +28446,15 @@ interpolant = next_keyframe.Ease(interpolant);
 }
 if (current_keyframe.Translation && next_keyframe.Translation) {
 lerp(transform2.Translation, current_keyframe.Translation, next_keyframe.Translation, interpolant);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 }
 if (current_keyframe.Rotation && next_keyframe.Rotation) {
 slerp(transform2.Rotation, current_keyframe.Rotation, next_keyframe.Rotation, interpolant);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 }
 if (current_keyframe.Scale && next_keyframe.Scale) {
 lerp(transform2.Scale, current_keyframe.Scale, next_keyframe.Scale, interpolant);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 }
 }
 let new_time = animate2.Current.Time + delta;
@@ -28573,7 +28740,7 @@ return x * x + y * y + z * z;
 }
 
 
-var QUERY2 = 2 /* AudioListener */ | 4194304 /* Transform */;
+var QUERY2 = 2 /* AudioListener */ | 8388608 /* Transform */;
 function sys_audio_listener(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY2) === QUERY2) {
@@ -28729,7 +28896,7 @@ source.start();
 }
 
 
-var QUERY3 = 4 /* AudioSource */ | 4194304 /* Transform */;
+var QUERY3 = 4 /* AudioSource */ | 8388608 /* Transform */;
 function sys_audio_source(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
@@ -28819,7 +28986,7 @@ ClearMask: clear_mask
 }
 
 
-var QUERY4 = 4194304 /* Transform */ | 8 /* Camera */;
+var QUERY4 = 8388608 /* Transform */ | 8 /* Camera */;
 function sys_camera(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY4) === QUERY4) {
@@ -28911,7 +29078,7 @@ return a2.Min[0] < b.Max[0] && a2.Max[0] > b.Min[0] && a2.Min[1] < b.Max[1] && a
 }
 
 
-var QUERY5 = 4194304 /* Transform */ | 32 /* Collide */;
+var QUERY5 = 8388608 /* Transform */ | 32 /* Collide */;
 function sys_collide(game2, delta) {
 let static_colliders = [];
 let dynamic_colliders = [];
@@ -28962,7 +29129,7 @@ Hit: negate([0, 0, 0], hit)
 }
 
 
-var QUERY6 = 64 /* ControlAlways */ | 16384 /* Move */;
+var QUERY6 = 64 /* ControlAlways */ | 32768 /* Move */;
 function sys_control_always(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
@@ -28988,7 +29155,7 @@ animate2.Trigger = control.Animation;
 }
 
 
-var QUERY7 = 128 /* ControlPlayer */ | 131072 /* RigidBody */;
+var QUERY7 = 128 /* ControlPlayer */ | 262144 /* RigidBody */;
 function sys_control_jump(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
@@ -29012,7 +29179,7 @@ game2.World.Animate[ent].Trigger = "jump";
 }
 
 
-var QUERY8 = 16384 /* Move */ | 128 /* ControlPlayer */;
+var QUERY8 = 32768 /* Move */ | 128 /* ControlPlayer */;
 function sys_control_keyboard(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
 if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
@@ -29044,32 +29211,94 @@ multiply(move2.SelfRotation, move2.SelfRotation, [1, 0, 0, 0]);
 }
 
 
-function render_colored_shadows(material, mesh, diffuse_color, shininess = 0, emission = 0, specular_rgb = [1, 1, 1], front_face = GL_CW) {
+var QUERY9 = 32768 /* Move */ | 128 /* ControlPlayer */;
+var AXIS_Y = [0, 1, 0];
+var AXIS_X = [1, 0, 0];
+var TOUCH_SENSITIVITY = 10;
+var joystick = [0, 0];
+var rotation = [0, 0, 0, 0];
+function sys_control_touch_move(game2, delta) {
+if (game2.InputDelta["Touch0"] === 1) {
+joystick[0] = game2.InputState["Touch0X"];
+joystick[1] = game2.InputState["Touch0Y"];
+console.log(joystick);
+}
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
+update7(game2, i);
+}
+}
+}
+function update7(game2, entity) {
+let transform2 = game2.World.Transform[entity];
+let control = game2.World.ControlPlayer[entity];
+let move2 = game2.World.Move[entity];
+if (control.Yaw && game2.InputDelta["Touch0X"]) {
+let amount = game2.InputDelta["Touch0X"] * control.Yaw * TOUCH_SENSITIVITY * DEG_TO_RAD;
+from_axis(rotation, AXIS_Y, -amount);
+multiply(transform2.Rotation, rotation, transform2.Rotation);
+game2.World.Signature[entity] |= 512 /* Dirty */;
+}
+if (control.Pitch && game2.InputDelta["Touch0Y"]) {
+let current_pitch = get_pitch(transform2.Rotation);
+let min_amount = control.MinPitch - current_pitch;
+let max_amount = control.MaxPitch - current_pitch;
+let amount = clamp(min_amount, max_amount, game2.InputDelta["Touch0Y"] * control.Pitch * TOUCH_SENSITIVITY);
+from_axis(rotation, AXIS_X, amount * DEG_TO_RAD);
+multiply(transform2.Rotation, transform2.Rotation, rotation);
+game2.World.Signature[entity] |= 512 /* Dirty */;
+}
+}
+
+
+var QUERY10 = 8388608 /* Transform */ | 256 /* Cull */;
+function sys_cull(game2, delta) {
+let camera_entity = game2.Cameras[0];
+let pv = game2.World.Camera[camera_entity].Pv;
+for (let i = 0; i < game2.World.Signature.length; i++) {
+if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
+update8(game2, i, pv);
+}
+}
+}
+var position3 = [0, 0, 0];
+function update8(game2, entity, pv) {
+let cull2 = game2.World.Cull[entity];
+let transform2 = game2.World.Transform[entity];
+get_translation(position3, transform2.World);
+transform_position(position3, position3, pv);
+if (Math.abs(position3[2]) > 1) {
+game2.World.Signature[entity] &= ~cull2.Mask;
+} else {
+game2.World.Signature[entity] |= cull2.Mask;
+}
+}
+
+
+function render_colored_shadows(material, mesh, diffuse_color) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 65536 /* Render */;
+game2.World.Signature[entity] |= 131072 /* Render */;
 game2.World.Render[entity] = {
 Kind: 2 /* ColoredShadows */,
 Material: material,
 Mesh: mesh,
 Phase: diffuse_color[3] < 1 ? 1 /* Transparent */ : 0 /* Opaque */,
-FrontFace: front_face,
-DiffuseColor: diffuse_color,
-SpecularColor: [...specular_rgb, shininess],
-EmissiveColor: [diffuse_color[0], diffuse_color[1], diffuse_color[2], emission]
+FrontFace: GL_CW,
+DiffuseColor: diffuse_color
 };
 };
 }
 var FLOATS_PER_PARTICLE = 8;
 
 
-function transform(translation = [0, 0, 0], rotation = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
+function transform(translation = [0, 0, 0], rotation2 = [0, 0, 0, 1], scale2 = [1, 1, 1]) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 4194304 /* Transform */ | 256 /* Dirty */;
+game2.World.Signature[entity] |= 8388608 /* Transform */ | 512 /* Dirty */;
 game2.World.Transform[entity] = {
 World: create(),
 Self: create(),
 Translation: translation,
-Rotation: rotation,
+Rotation: rotation2,
 Scale: scale2,
 Gyroscope: false
 };
@@ -29077,24 +29306,24 @@ Gyroscope: false
 }
 
 
-var QUERY9 = 4194304 /* Transform */ | 512 /* Draw */;
+var QUERY11 = 8388608 /* Transform */ | 1024 /* Draw */;
 function sys_draw(game2, delta) {
 game2.Context2D.resetTransform();
 game2.Context2D.clearRect(0, 0, game2.ViewportWidth, game2.ViewportHeight);
-let position3 = [0, 0, 0];
+let position4 = [0, 0, 0];
 let camera_entity = game2.Cameras[0];
 let main_camera = game2.World.Camera[camera_entity];
 if (!main_camera || main_camera.Kind === 2 /* Xr */) {
 return;
 }
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY9) == QUERY9) {
-get_translation(position3, game2.World.Transform[i].World);
-transform_position(position3, position3, main_camera.Pv);
-if (position3[2] < -1 || position3[2] > 1) {
+if ((game2.World.Signature[i] & QUERY11) == QUERY11) {
+get_translation(position4, game2.World.Transform[i].World);
+transform_position(position4, position4, main_camera.Pv);
+if (position4[2] < -1 || position4[2] > 1) {
 continue;
 }
-game2.Context2D.setTransform(1, 0, 0, 1, 0.5 * (position3[0] + 1) * game2.ViewportWidth, 0.5 * (-position3[1] + 1) * game2.ViewportHeight);
+game2.Context2D.setTransform(1, 0, 0, 1, 0.5 * (position4[0] + 1) * game2.ViewportWidth, 0.5 * (-position4[1] + 1) * game2.ViewportHeight);
 let draw = game2.World.Draw[i];
 switch (draw.Kind) {
 case 0 /* Text */:
@@ -29119,15 +29348,15 @@ game2.Context2D.strokeRect(-draw.Size / 2, -draw.Size / 2, draw.Size, draw.Size)
 }
 
 
-var QUERY10 = 2048 /* Lifespan */;
+var QUERY12 = 4096 /* Lifespan */;
 function sys_lifespan(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY10) == QUERY10) {
-update7(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
+update9(game2, i, delta);
 }
 }
 }
-function update7(game2, entity, delta) {
+function update9(game2, entity, delta) {
 let lifespan2 = game2.World.Lifespan[entity];
 lifespan2.Remaining -= delta;
 if (lifespan2.Remaining < 0) {
@@ -29139,41 +29368,10 @@ destroy_all(game2.World, entity);
 }
 
 
-var QUERY11 = 4194304 /* Transform */ | 4096 /* Light */;
-function sys_light(game2, delta) {
-game2.LightPositions.fill(0);
-game2.LightDetails.fill(0);
-let counter = 0;
-for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY11) === QUERY11) {
-update8(game2, i, counter++);
-}
-}
-}
-var world_pos = [0, 0, 0];
-function update8(game2, entity, idx) {
-let light = game2.World.Light[entity];
-let transform2 = game2.World.Transform[entity];
-if (light.Kind === 2 /* Directional */) {
-get_forward(world_pos, transform2.World);
-} else {
-get_translation(world_pos, transform2.World);
-}
-game2.LightPositions[4 * idx + 0] = world_pos[0];
-game2.LightPositions[4 * idx + 1] = world_pos[1];
-game2.LightPositions[4 * idx + 2] = world_pos[2];
-game2.LightPositions[4 * idx + 3] = light.Kind;
-game2.LightDetails[4 * idx + 0] = light.Color[0];
-game2.LightDetails[4 * idx + 1] = light.Color[1];
-game2.LightDetails[4 * idx + 2] = light.Color[2];
-game2.LightDetails[4 * idx + 3] = light.Intensity;
-}
-
-
-var QUERY12 = 4194304 /* Transform */ | 8192 /* Mimic */;
+var QUERY13 = 8388608 /* Transform */ | 16384 /* Mimic */;
 function sys_mimic(game2, delta) {
 for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-if ((game2.World.Signature[ent] & QUERY12) === QUERY12) {
+if ((game2.World.Signature[ent] & QUERY13) === QUERY13) {
 let follower_transform = game2.World.Transform[ent];
 let follower_mimic = game2.World.Mimic[ent];
 let target_transform = game2.World.Transform[follower_mimic.Target];
@@ -29181,22 +29379,22 @@ let target_world_position = get_translation([0, 0, 0], target_transform.World);
 let target_world_rotation = get_rotation([0, 0, 0, 0], target_transform.World);
 lerp(follower_transform.Translation, follower_transform.Translation, target_world_position, follower_mimic.Stiffness);
 slerp(follower_transform.Rotation, follower_transform.Rotation, target_world_rotation, follower_mimic.Stiffness);
-game2.World.Signature[ent] |= 256 /* Dirty */;
+game2.World.Signature[ent] |= 512 /* Dirty */;
 }
 }
 }
 
 
-var QUERY13 = 4194304 /* Transform */ | 16384 /* Move */;
+var QUERY14 = 8388608 /* Transform */ | 32768 /* Move */;
 var NO_ROTATION = [0, 0, 0, 1];
 function sys_move(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY13) === QUERY13) {
-update9(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY14) === QUERY14) {
+update10(game2, i, delta);
 }
 }
 }
-function update9(game2, entity, delta) {
+function update10(game2, entity, delta) {
 let transform2 = game2.World.Transform[entity];
 let move2 = game2.World.Move[entity];
 if (move2.Direction[0] !== 0 || move2.Direction[1] !== 0 || move2.Direction[2] !== 0) {
@@ -29209,37 +29407,37 @@ transform_direction(move2.Direction, move2.Direction, parent.Self);
 normalize(move2.Direction, move2.Direction);
 scale(move2.Direction, move2.Direction, amount * move2.MoveSpeed * delta);
 add(transform2.Translation, transform2.Translation, move2.Direction);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 set(move2.Direction, 0, 0, 0);
 }
 if (move2.LocalRotation[3] < 1) {
 let t = Math.min(1, move2.RotationSpeed / Math.PI * delta);
 slerp(move2.LocalRotation, NO_ROTATION, move2.LocalRotation, t);
 multiply(transform2.Rotation, move2.LocalRotation, transform2.Rotation);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 set2(move2.LocalRotation, 0, 0, 0, 1);
 }
 if (move2.SelfRotation[3] < 1) {
 let t = Math.min(1, move2.RotationSpeed / Math.PI * delta);
 slerp(move2.SelfRotation, NO_ROTATION, move2.SelfRotation, t);
 multiply(transform2.Rotation, transform2.Rotation, move2.SelfRotation);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 set2(move2.SelfRotation, 0, 0, 0, 1);
 }
 }
 
 
-var QUERY14 = 4194304 /* Transform */ | 1024 /* EmitParticles */;
+var QUERY15 = 8388608 /* Transform */ | 2048 /* EmitParticles */;
 function sys_particles(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY14) == QUERY14) {
-update10(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY15) == QUERY15) {
+update11(game2, i, delta);
 }
 }
 }
 var origin = [0, 0, 0];
 var forward3 = [0, 0, 0];
-function update10(game2, entity, delta) {
+function update11(game2, entity, delta) {
 let emitter = game2.World.EmitParticles[entity];
 let transform2 = game2.World.Transform[entity];
 emitter.SinceLast += delta;
@@ -29263,7 +29461,7 @@ i += FLOATS_PER_PARTICLE;
 
 function rigid_body(kind, bounciness = 0.5) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 131072 /* RigidBody */;
+game2.World.Signature[entity] |= 262144 /* RigidBody */;
 game2.World.RigidBody[entity] = {
 Kind: kind,
 ColliderId: entity,
@@ -29278,16 +29476,16 @@ IsAirborne: false
 }
 
 
-var QUERY15 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+var QUERY16 = 8388608 /* Transform */ | 262144 /* RigidBody */;
 var GRAVITY = -9.81;
 function sys_physics_integrate(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY15) === QUERY15) {
-update11(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY16) === QUERY16) {
+update12(game2, i, delta);
 }
 }
 }
-function update11(game2, entity, delta) {
+function update12(game2, entity, delta) {
 let transform2 = game2.World.Transform[entity];
 let rigid_body2 = game2.World.RigidBody[entity];
 if (rigid_body2.Kind === 1 /* Dynamic */) {
@@ -29298,23 +29496,23 @@ rigid_body2.VelocityIntegrated[1] += GRAVITY * delta;
 let vel_delta = [0, 0, 0];
 scale(vel_delta, rigid_body2.VelocityIntegrated, delta);
 add(transform2.Translation, transform2.Translation, vel_delta);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 set(rigid_body2.Acceleration, 0, 0, 0);
 }
 }
 
 
-var QUERY16 = 4194304 /* Transform */ | 131072 /* RigidBody */;
+var QUERY17 = 8388608 /* Transform */ | 262144 /* RigidBody */;
 function sys_physics_kinematic(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY16) === QUERY16) {
-update12(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY17) === QUERY17) {
+update13(game2, i, delta);
 }
 }
 }
 var current_position = [0, 0, 0];
 var movement_delta = [0, 0, 0];
-function update12(game2, entity, delta) {
+function update13(game2, entity, delta) {
 let transform2 = game2.World.Transform[entity];
 let rigid_body2 = game2.World.RigidBody[entity];
 get_translation(current_position, transform2.World);
@@ -29326,16 +29524,16 @@ copy(rigid_body2.LastPosition, current_position);
 }
 
 
-var QUERY17 = 4194304 /* Transform */ | 32 /* Collide */ | 131072 /* RigidBody */;
+var QUERY18 = 8388608 /* Transform */ | 32 /* Collide */ | 262144 /* RigidBody */;
 function sys_physics_resolve(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY17) === QUERY17) {
-update13(game2, i);
+if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
+update14(game2, i);
 }
 }
 }
 var a = [0, 0, 0];
-function update13(game2, entity) {
+function update14(game2, entity) {
 let transform2 = game2.World.Transform[entity];
 let rigid_body2 = game2.World.RigidBody[entity];
 let collide2 = game2.World.Collide[rigid_body2.ColliderId];
@@ -29344,10 +29542,10 @@ rigid_body2.IsAirborne = true;
 let has_collision = false;
 for (let i = 0; i < collide2.Collisions.length; i++) {
 let collision = collide2.Collisions[i];
-if (game2.World.Signature[collision.Other] & 131072 /* RigidBody */) {
+if (game2.World.Signature[collision.Other] & 262144 /* RigidBody */) {
 has_collision = true;
 add(transform2.Translation, transform2.Translation, collision.Hit);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 let other_body = game2.World.RigidBody[collision.Other];
 switch (other_body.Kind) {
 case 0 /* Static */:
@@ -29378,7 +29576,7 @@ copy(rigid_body2.VelocityResolved, rigid_body2.VelocityIntegrated);
 
 function task_when(predicate, on_done) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 1048576 /* Task */;
+game2.World.Signature[entity] |= 2097152 /* Task */;
 game2.World.Task[entity] = {
 Kind: 0 /* When */,
 Predicate: predicate,
@@ -29388,11 +29586,11 @@ OnDone: on_done
 }
 
 
-var QUERY18 = 1048576 /* Task */;
+var QUERY19 = 2097152 /* Task */;
 function sys_poll(game2, delta) {
 let tasks_to_complete = [];
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
+if ((game2.World.Signature[i] & QUERY19) === QUERY19) {
 if (has_blocking_dependencies(game2.World, i)) {
 continue;
 }
@@ -29419,7 +29617,7 @@ let task = game2.World.Task[entity];
 if (task.OnDone) {
 task.OnDone(entity);
 }
-game2.World.Signature[entity] &= ~1048576 /* Task */;
+game2.World.Signature[entity] &= ~2097152 /* Task */;
 if (game2.World.Signature[entity] === 0 /* None */) {
 game2.World.DestroyEntity(entity);
 }
@@ -29430,7 +29628,7 @@ function has_blocking_dependencies(world, entity) {
 if (world.Signature[entity] & 16 /* Children */) {
 let children2 = world.Children[entity];
 for (let child of children2.Children) {
-if (world.Signature[child] & 1048576 /* Task */) {
+if (world.Signature[child] & 2097152 /* Task */) {
 return true;
 }
 }
@@ -29439,7 +29637,7 @@ return false;
 }
 
 
-var QUERY19 = 4194304 /* Transform */ | 65536 /* Render */;
+var QUERY20 = 8388608 /* Transform */ | 131072 /* Render */;
 function sys_render_depth(game2, delta) {
 for (let camera_entity of game2.Cameras) {
 let camera = game2.World.Camera[camera_entity];
@@ -29460,7 +29658,7 @@ let current_front_face = null;
 game2.Gl.useProgram(material.Program);
 game2.Gl.uniformMatrix4fv(material.Locations.Pv, false, eye.Pv);
 for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-if ((game2.World.Signature[ent] & QUERY19) === QUERY19) {
+if ((game2.World.Signature[ent] & QUERY20) === QUERY20) {
 let transform2 = game2.World.Transform[ent];
 let render = game2.World.Render[ent];
 switch (render.Kind) {
@@ -29482,7 +29680,7 @@ game2.Gl.bindVertexArray(null);
 }
 
 
-var QUERY20 = 4194304 /* Transform */ | 65536 /* Render */;
+var QUERY21 = 8388608 /* Transform */ | 131072 /* Render */;
 function sys_render_forward(game2, delta) {
 for (let camera_entity of game2.Cameras) {
 let camera = game2.World.Camera[camera_entity];
@@ -29511,7 +29709,7 @@ let current_material = null;
 let current_front_face = null;
 let transparent_entities = [];
 for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-if ((game2.World.Signature[ent] & QUERY20) === QUERY20) {
+if ((game2.World.Signature[ent] & QUERY21) === QUERY21) {
 let render = game2.World.Render[ent];
 if (render.Phase === 1 /* Transparent */) {
 transparent_entities.push(ent);
@@ -29565,13 +29763,10 @@ break;
 case 2 /* ColoredShadows */:
 game2.Gl.useProgram(render.Material.Program);
 game2.Gl.uniformMatrix4fv(render.Material.Locations.Pv, false, eye.Pv);
-game2.Gl.uniform3fv(render.Material.Locations.Eye, eye.Position);
-game2.Gl.uniform4fv(render.Material.Locations.LightPositions, game2.LightPositions);
-game2.Gl.uniform4fv(render.Material.Locations.LightDetails, game2.LightDetails);
 game2.Gl.activeTexture(GL_TEXTURE0);
 game2.Gl.bindTexture(GL_TEXTURE_2D, game2.Targets.Sun.DepthTexture);
 game2.Gl.uniform1i(render.Material.Locations.ShadowMap, 0);
-let light_entity = first_having(game2.World, 8 /* Camera */ | 4096 /* Light */);
+let light_entity = first_having(game2.World, 8 /* Camera */ | 8192 /* Light */);
 if (light_entity) {
 let light_camera = game2.World.Camera[light_entity];
 if (light_camera.Kind === 2 /* Xr */) {
@@ -29629,10 +29824,7 @@ game2.Gl.bindVertexArray(null);
 break;
 case 2 /* ColoredShadows */:
 game2.Gl.uniformMatrix4fv(render.Material.Locations.World, false, transform2.World);
-game2.Gl.uniformMatrix4fv(render.Material.Locations.Self, false, transform2.Self);
-game2.Gl.uniform4fv(render.Material.Locations.DiffuseColor, render.DiffuseColor);
-game2.Gl.uniform4fv(render.Material.Locations.SpecularColor, render.SpecularColor);
-game2.Gl.uniform4fv(render.Material.Locations.EmissiveColor, render.EmissiveColor);
+game2.Gl.uniform4fv(render.Material.Locations.Color, render.DiffuseColor);
 game2.Gl.bindVertexArray(render.Mesh.Vao);
 game2.Gl.drawElements(render.Material.Mode, render.Mesh.IndexCount, GL_UNSIGNED_SHORT, 0);
 game2.Gl.bindVertexArray(null);
@@ -29751,7 +29943,7 @@ invert(projection.Inverse, projection.Projection);
 }
 
 
-var QUERY21 = 8 /* Camera */;
+var QUERY22 = 8 /* Camera */;
 function sys_resize(game2, delta) {
 if (game2.ViewportWidth != window.innerWidth || game2.ViewportHeight != window.innerHeight) {
 game2.ViewportResized = true;
@@ -29775,7 +29967,7 @@ break;
 }
 }
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY21) === QUERY21) {
+if ((game2.World.Signature[i] & QUERY22) === QUERY22) {
 let camera = game2.World.Camera[i];
 switch (camera.Kind) {
 case 0 /* Canvas */:
@@ -29804,32 +29996,32 @@ break;
 }
 
 
-var QUERY22 = 4194304 /* Transform */ | 262144 /* Shake */;
+var QUERY23 = 8388608 /* Transform */ | 524288 /* Shake */;
 function sys_shake(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY22) == QUERY22) {
-update14(game2, i);
+if ((game2.World.Signature[i] & QUERY23) == QUERY23) {
+update15(game2, i);
 }
 }
 }
-function update14(game2, entity) {
+function update15(game2, entity) {
 let shake2 = game2.World.Shake[entity];
 let transform2 = game2.World.Transform[entity];
 transform2.Translation = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
 scale(transform2.Translation, transform2.Translation, shake2.Magnitude * 2);
-game2.World.Signature[entity] |= 256 /* Dirty */;
+game2.World.Signature[entity] |= 512 /* Dirty */;
 }
 
 
-var QUERY23 = 4194304 /* Transform */ | 524288 /* Spawn */;
+var QUERY24 = 8388608 /* Transform */ | 1048576 /* Spawn */;
 function sys_spawn(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY23) == QUERY23) {
-update15(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
+update16(game2, i, delta);
 }
 }
 }
-function update15(game2, entity, delta) {
+function update16(game2, entity, delta) {
 let spawn2 = game2.World.Spawn[entity];
 spawn2.SinceLast += delta;
 if (spawn2.SinceLast > spawn2.Interval) {
@@ -29844,15 +30036,15 @@ instantiate(game2, [...spawn2.Creator(game2), transform(world_position2, world_r
 }
 
 
-var QUERY24 = 2097152 /* Toggle */;
+var QUERY25 = 4194304 /* Toggle */;
 function sys_toggle(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
-update16(game2, i, delta);
+if ((game2.World.Signature[i] & QUERY25) == QUERY25) {
+update17(game2, i, delta);
 }
 }
 }
-function update16(game2, entity, delta) {
+function update17(game2, entity, delta) {
 let toggle = game2.World.Toggle[entity];
 toggle.SinceLast += delta;
 if (toggle.SinceLast > toggle.Frequency) {
@@ -29868,10 +30060,10 @@ game2.World.Signature[entity] |= toggle.Mask;
 }
 
 
-var QUERY25 = 4194304 /* Transform */ | 256 /* Dirty */;
+var QUERY26 = 8388608 /* Transform */ | 512 /* Dirty */;
 function sys_transform(game2, delta) {
 for (let ent = 0; ent < game2.World.Signature.length; ent++) {
-if ((game2.World.Signature[ent] & QUERY25) === QUERY25) {
+if ((game2.World.Signature[ent] & QUERY26) === QUERY26) {
 let transform2 = game2.World.Transform[ent];
 update_transform(game2.World, ent, transform2);
 }
@@ -29879,7 +30071,7 @@ update_transform(game2.World, ent, transform2);
 }
 var world_position = [0, 0, 0];
 function update_transform(world, entity, transform2) {
-world.Signature[entity] &= ~256 /* Dirty */;
+world.Signature[entity] &= ~512 /* Dirty */;
 from_rotation_translation_scale(transform2.World, transform2.Rotation, transform2.Translation, transform2.Scale);
 if (transform2.Parent !== void 0) {
 let parent_transform = world.Transform[transform2.Parent];
@@ -29894,7 +30086,7 @@ if (world.Signature[entity] & 16 /* Children */) {
 let children2 = world.Children[entity];
 for (let i = 0; i < children2.Children.length; i++) {
 let child = children2.Children[i];
-if (world.Signature[child] & 4194304 /* Transform */) {
+if (world.Signature[child] & 8388608 /* Transform */) {
 let child_transform = world.Transform[child];
 child_transform.Parent = entity;
 update_transform(world, child, child_transform);
@@ -29904,15 +30096,15 @@ update_transform(world, child, child_transform);
 }
 
 
-var QUERY26 = 4194304 /* Transform */ | 32 /* Collide */ | 8388608 /* Trigger */;
+var QUERY27 = 8388608 /* Transform */ | 32 /* Collide */ | 16777216 /* Trigger */;
 function sys_trigger(game2, delta) {
 for (let i = 0; i < game2.World.Signature.length; i++) {
-if ((game2.World.Signature[i] & QUERY26) === QUERY26) {
-update17(game2, i);
+if ((game2.World.Signature[i] & QUERY27) === QUERY27) {
+update18(game2, i);
 }
 }
 }
-function update17(game2, entity) {
+function update18(game2, entity) {
 let collide2 = game2.World.Collide[entity];
 let trigger = game2.World.Trigger[entity];
 for (let collision of collide2.Collisions) {
@@ -30003,6 +30195,7 @@ this.MaterialColoredShadows = mat_forward_colored_shadows(this.Gl);
 this.MaterialParticlesColored = mat_forward_particles_colored(this.Gl);
 this.MaterialDepth = mat_forward_depth(this.Gl);
 this.MeshCube = mesh_cube(this.Gl);
+this.MeshCylinder = mesh_cylinder(this.Gl);
 this.MeshBody = mesh_body(this.Gl);
 this.MeshWheel = mesh_wheel(this.Gl);
 this.MeshHand = mesh_hand(this.Gl);
@@ -30029,9 +30222,11 @@ FrameUpdate(delta) {
 sys_poll(this, delta);
 sys_resize(this, delta);
 sys_camera(this, delta);
+sys_cull(this, delta);
 sys_control_always(this, delta);
 sys_control_keyboard(this, delta);
 sys_control_jump(this, delta);
+sys_control_touch_move(this, delta);
 sys_animate(this, delta);
 sys_move(this, delta);
 sys_mimic(this, delta);
@@ -30046,7 +30241,6 @@ sys_debug(this, delta);
 }
 sys_audio_listener(this, delta);
 sys_audio_source(this, delta);
-sys_light(this, delta);
 sys_render_depth(this, delta);
 sys_render_forward(this, delta);
 sys_draw(this, delta);
@@ -30057,7 +30251,7 @@ sys_ui(this, delta);
 
 function mimic(Target, Stiffness = 0.1) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 8192 /* Mimic */;
+game2.World.Signature[entity] |= 16384 /* Mimic */;
 game2.World.Mimic[entity] = {
 Target,
 Stiffness
@@ -30068,13 +30262,13 @@ Stiffness
 
 function named(Name) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 32768 /* Named */;
+game2.World.Signature[entity] |= 65536 /* Named */;
 game2.World.Named[entity] = { Name };
 };
 }
 function first_named(world, name, start_at = 0) {
 for (let i = start_at; i < world.Signature.length; i++) {
-if (world.Signature[i] & 32768 /* Named */ && world.Named[i].Name === name) {
+if (world.Signature[i] & 65536 /* Named */ && world.Named[i].Name === name) {
 return i;
 }
 }
@@ -30098,7 +30292,7 @@ camera_canvas(perspective(1, 0.1, 1e3), [170 / 255, 199 / 255, 172 / 255, 1])
 
 function light_directional(color = [1, 1, 1], intensity = 1) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 4096 /* Light */;
+game2.World.Signature[entity] |= 8192 /* Light */;
 game2.World.Light[entity] = {
 Kind: 2 /* Directional */,
 Color: color,
@@ -30139,6 +30333,16 @@ Collisions: []
 }
 
 
+function cull(mask) {
+return (game2, entity) => {
+game2.World.Signature[entity] |= 256 /* Cull */;
+game2.World.Cull[entity] = {
+Mask: mask
+};
+};
+}
+
+
 function ease_in_quad(t) {
 return t * t;
 }
@@ -30170,12 +30374,12 @@ Time: 0
 }
 
 
-function control_always(direction, rotation, animation) {
+function control_always(direction, rotation2, animation) {
 return (game2, entity) => {
 game2.World.Signature[entity] |= 64 /* ControlAlways */;
 game2.World.ControlAlways[entity] = {
 Direction: direction,
-Rotation: rotation,
+Rotation: rotation2,
 Animation: animation
 };
 };
@@ -30205,7 +30409,7 @@ game2.World.Signature[entity] &= ~mask;
 
 function move(move_speed, rotation_speed) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 16384 /* Move */;
+game2.World.Signature[entity] |= 32768 /* Move */;
 game2.World.Move[entity] = {
 MoveSpeed: move_speed,
 RotationSpeed: rotation_speed,
@@ -30219,7 +30423,7 @@ SelfRotation: [0, 0, 0, 1]
 
 function shake(magnitude) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 262144 /* Shake */;
+game2.World.Signature[entity] |= 524288 /* Shake */;
 game2.World.Shake[entity] = {
 Magnitude: magnitude
 };
@@ -30229,7 +30433,7 @@ Magnitude: magnitude
 
 function spawn(creator, interval) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 524288 /* Spawn */;
+game2.World.Signature[entity] |= 1048576 /* Spawn */;
 game2.World.Spawn[entity] = {
 Creator: creator,
 Interval: interval,
@@ -30248,7 +30452,7 @@ fn(game2, entity);
 
 function lifespan(remaining, action) {
 return (game2, entity) => {
-game2.World.Signature[entity] |= 2048 /* Lifespan */;
+game2.World.Signature[entity] |= 4096 /* Lifespan */;
 game2.World.Lifespan[entity] = {
 Remaining: remaining,
 Action: action
@@ -30285,9 +30489,9 @@ children([
 transform(),
 shake(5),
 spawn(blueprint_hand, 2),
-disable(524288 /* Spawn */),
+disable(1048576 /* Spawn */),
 task_when(() => game2.PlayState === "playing", (entity) => {
-game2.World.Signature[entity] |= 524288 /* Spawn */;
+game2.World.Signature[entity] |= 1048576 /* Spawn */;
 })
 ])
 ];
@@ -30433,48 +30637,543 @@ transform([0, -0.5, 0], void 0, [10, 1, 10]),
 collide(false, 2 /* Terrain */, 0 /* None */),
 rigid_body(0 /* Static */),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
-221 / 255,
-157 / 255,
-105 / 255,
+226.62646581132924 / 255,
+145.25775671274022 / 255,
+98.86691049296672 / 255,
 1
 ])
 ]);
 instantiate(game2, [
-transform([-3.8, 0.3, 3.6], void 0, [1.8, 0.35, 2.2]),
+transform([-3.8, 0.37, 3.6], void 0, [1.8, 0.35, 2.2]),
 collide(false, 2 /* Terrain */, 0 /* None */),
 rigid_body(0 /* Static */),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
-221 / 255,
-157 / 255,
-105 / 255,
+216.27764569735177 / 255,
+164.83714605924766 / 255,
+104.07544586774654 / 255,
 1
-])
+]),
+cull(131072 /* Render */)
 ]);
 instantiate(game2, [
-transform([-2.5, 0.4, 4.4], void 0, [0.5, 0.5, 0.5]),
+transform([-2.39, 0.45, 4.3], void 0, [0.7, 0.5, 0.7]),
 collide(false, 2 /* Terrain */, 0 /* None */),
 rigid_body(0 /* Static */),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
-221 / 255,
-157 / 255,
-105 / 255,
+233.79042962728573 / 255,
+154.14553218261744 / 255,
+95.41397682431324 / 255,
 1
-])
+]),
+cull(131072 /* Render */)
 ]);
 instantiate(game2, [
-transform([-2.5, 0.4, 4.4], void 0, [0.5, 0.5, 0.5]),
+transform([-2.5, 1, 4.4], void 0, [0.25, 0.2, 0.25]),
 collide(false, 2 /* Terrain */, 0 /* None */),
 rigid_body(0 /* Static */),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
-221 / 255,
-157 / 255,
-105 / 255,
+219.2067223426168 / 255,
+151.7062386803476 / 255,
+114.326444612209 / 255,
 1
-])
+]),
+cull(131072 /* Render */)
 ]);
 instantiate(game2, [
 ...blueprint_player(game2),
-transform([-2.5, 1, 4.4], [0, 1, 0, 0], [0.05, 0.05, 0.05])
+transform([-2.2, 1, 4.2], [0, 1, 0, 0], [0.05, 0.05, 0.05])
+]);
+instantiate(game2, [
+transform([-2.5, 0.8, 4.4], void 0, [0.1, 0.2, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+233.48768020126457 / 255,
+142.73688198802338 / 255,
+94.39508480874281 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-3.1, 0.1, 4.4], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+207.02610290565715 / 255,
+149.39101673919802 / 255,
+90.0705893611105 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-4.5, 0.1, 4.4], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+209.3046787007104 / 255,
+158.90019684775265 / 255,
+115.59982301389691 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-4.5, 0.1, 2.8], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+229.70795071181212 / 255,
+142.1602568671378 / 255,
+109.52986632075928 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-3.1, 0.1, 2.8], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+207.38724806047017 / 255,
+165.27318223065174 / 255,
+92.55051557742689 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2.6, 0.1, 4.5], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+212.53992972215684 / 255,
+148.58116496374274 / 255,
+98.30445630333128 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2.2, 0.1, 4.5], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+207.97987233379928 / 255,
+156.3263012422623 / 255,
+93.13637652064496 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2.2, 0.1, 4.1], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+226.17053651547684 / 255,
+150.3084891023513 / 255,
+91.34806351933736 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2.6, 0.1, 4.1], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+232.2341484064215 / 255,
+148.81483482681466 / 255,
+100.22400748126843 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-3.8, 1.1, 0.3], void 0, [1.8, 1.73, -0.44]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+224.95515608857048 / 255,
+159.74149077388518 / 255,
+116.50111495285759 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-4.5, 0.1, 0.4], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+227.04064146236976 / 255,
+157.1825254429045 / 255,
+102.74025810927192 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-4.5, 0.1, 0.2], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+216.3861917592639 / 255,
+164.40657166311453 / 255,
+95.31064078340009 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-3.1, 0.1, 0.2], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+213.95010621253897 / 255,
+147.16907188951575 / 255,
+112.82002214490126 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-3.1, 0.1, 0.4], void 0, [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+221.69659621462856 / 255,
+156.5801349793491 / 255,
+94.18651289495395 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.82, 0.42, 3.27], [0, -0.91, 0, 0.42], [0.72, 0.35, 0.88]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+228.86900262756356 / 255,
+148.49312678678342 / 255,
+94.89891480907922 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.72, 0.12, 2.93], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+218.14769770926006 / 255,
+164.21705539070715 / 255,
+91.89768715832791 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.46, 0.12, 3.23], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+224.92828123825666 / 255,
+146.29167955887925 / 255,
+119.11896403943898 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.92, 0.12, 3.62], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+221.75904138318518 / 255,
+154.23083655821713 / 255,
+96.76538442840437 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([1.18, 0.12, 3.31], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+231.8915908971943 / 255,
+150.035353299085 / 255,
+92.54884083232797 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.65, 0.77, 3.48], [0, -0.91, 0, 0.42], [0.17, 0.35, 0.88]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+226.93073209456773 / 255,
+157.9892565640609 / 255,
+107.54535443134165 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.55, 0.77, 3.04], [0, -0.91, 0, 0.42], [0.72, 0.35, 0.16]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+206.70274267642347 / 255,
+146.1604520163499 / 255,
+111.1691149723218 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([1.1, 0.77, 3.51], [0, -0.91, 0, 0.42], [0.72, 0.35, 0.16]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+214.71283006140735 / 255,
+160.33789247819863 / 255,
+110.78414584704842 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([1.62, 0.44, 0.25], [0, 0.84, 0, 0.54], [0.72, 0.35, 1.76]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+231.26055447778316 / 255,
+155.27862295699694 / 255,
+93.79924723879547 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([2.34, 0.14, 0.13], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+209.84276310817796 / 255,
+146.912294726208 / 255,
+93.18544889882318 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([2.15, 0.14, -0.28], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+224.6803222117202 / 255,
+143.83913188014708 / 255,
+98.89307089905208 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([0.9, 0.14, 0.36], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+233.37688068964582 / 255,
+148.21770951111674 / 255,
+112.944188555918 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([1.05, 0.14, 0.68], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+218.45569447825093 / 255,
+156.01233148856812 / 255,
+103.38196791592907 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([1.54, 0.79, 0.06], [0, 0.84, 0, 0.54], [0.17, 0.35, 1.67]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+229.27426348654686 / 255,
+163.26394870481786 / 255,
+110.19495918976415 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.07, 0.42, 2.28], [0, -0.26, 0, 0.97], [0.72, 0.35, 0.88]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+221.16258333251602 / 255,
+168.43145251181443 / 255,
+94.05211422340523 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([3.75, 0.12, 2.44], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+224.17422393762843 / 255,
+164.77416998277533 / 255,
+95.65608648134514 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.09, 0.12, 2.64], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+224.54934366926557 / 255,
+150.92589050524882 / 255,
+118.91696385056301 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.39, 0.12, 2.12], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+211.3031334605731 / 255,
+148.0242053621933 / 255,
+100.88263843618266 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.05, 0.12, 1.92], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+230.4415429114464 / 255,
+167.77589395995358 / 255,
+92.14503442626375 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.31, 0.77, 2.42], [0, -0.26, 0, 0.97], [0.17, 0.35, 0.88]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+226.9061723371245 / 255,
+158.61748354186756 / 255,
+117.28518548644564 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([3.89, 0.77, 2.6], [0, -0.26, 0, 0.97], [0.72, 0.35, 0.16]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+230.97814186254007 / 255,
+155.8986753032226 / 255,
+107.69683673144151 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([4.25, 0.77, 1.97], [0, -0.26, 0, 0.97], [0.72, 0.35, 0.16]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+208.59742963639312 / 255,
+157.83135613508355 / 255,
+95.74819431054637 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2, 0.32, -2.5], void 0, [0.1, 0.58, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+227.8711866724623 / 255,
+160.03703333630705 / 255,
+102.5268290798797 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-1.8, 0.64, -2.7], void 0, [1.44, 0.1, 1.44]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+222.60563645980002 / 255,
+161.402771928834 / 255,
+103.12917474878878 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-1.6, 0.34, -2.5], void 0, [0.1, 0.58, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+207.16378138481082 / 255,
+154.09318680928186 / 255,
+110.71820183307588 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-1.6, 0.34, -2.9], void 0, [0.1, 0.58, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+220.7597707416725 / 255,
+146.85645374686317 / 255,
+97.52370744051026 / 255,
+1
+]),
+cull(131072 /* Render */)
+]);
+instantiate(game2, [
+transform([-2, 0.34, -2.9], void 0, [0.1, 0.58, 0.1]),
+collide(false, 2 /* Terrain */, 0 /* None */),
+rigid_body(0 /* Static */),
+render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+209.42412038445823 / 255,
+163.59585915406558 / 255,
+93.56446527553005 / 255,
+1
+]),
+cull(131072 /* Render */)
 ]);
 }
 
@@ -30483,11 +31182,11 @@ function scene_room(game2) {
 game2.World = new World();
 game2.ViewportResized = true;
 map_room1(game2);
+instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 10, 0])]);
 instantiate(game2, [
 ...blueprint_sun(game2),
 transform(void 0, from_euler([0, 0, 0, 0], -45, 45, 0))
 ]);
-instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 10, 0])]);
 }
 
 
