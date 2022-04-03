@@ -69,6 +69,15 @@ export function blueprint_player(game: Game) {
                         Flags: AnimationFlag.None,
                     },
                 }),
+                children([
+                    transform([0, 1, 0], undefined, [0.6, 0.1, 0.5]),
+                    render_colored_shadows(game.MaterialColoredShadows, game.MeshBody, [
+                        174 / 0xff,
+                        248 / 0xff,
+                        181 / 0xff,
+                        1,
+                    ]),
+                ]),
             ],
             // Axel.
             [
