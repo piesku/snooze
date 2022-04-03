@@ -6,12 +6,12 @@ import {Entity} from "../../common/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
-export type Draw = DrawText | DrawRect | DrawSelection;
+export type Draw = DrawText | DrawRect | DrawImage;
 
 export const enum DrawKind {
     Text,
     Rect,
-    Selection,
+    Image,
 }
 
 export interface DrawText {
@@ -52,20 +52,19 @@ export function draw_rect(Width: number, Height: number, Color: string) {
     };
 }
 
-export interface DrawSelection {
-    Kind: DrawKind.Selection;
-    Color: string;
-    Size: number;
+export interface DrawImage {
+    Kind: DrawKind.Image;
+    Width: number;
+    Height: number;
 }
 
-export function draw_selection(color: string) {
+export function draw_image(Width: number, Height: number) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Draw;
         game.World.Draw[entity] = {
-            Kind: DrawKind.Selection,
-            Color: color,
-            // Set in sys_highlight.
-            Size: 0,
+            Kind: DrawKind.Image,
+            Width,
+            Height,
         };
     };
 }

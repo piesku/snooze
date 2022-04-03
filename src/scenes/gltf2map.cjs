@@ -58,6 +58,14 @@ let create_instance = (name, translation, rotation, scale) => {
         ...blueprint_player(game),
         transform(${vec(translation)}, [0, 1, 0, 0], [0.05, 0.05, 0.05]),
     ]);`;
+        case "face":
+            imports.add('import {blueprint_face} from "../blueprints/blu_face.js";');
+            return `
+    // Face.
+    instantiate(game, [
+        ...blueprint_face(game),
+        transform(${vec(translation)}),
+    ]);`;
         case "floor":
             return `
     instantiate(game, [

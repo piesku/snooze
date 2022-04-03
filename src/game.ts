@@ -120,7 +120,7 @@ export class Game extends Game3D {
         sys_audio_source(this, delta);
         sys_render_depth(this, delta);
         sys_render_forward(this, delta);
-        sys_draw(this, delta);
+        false && sys_draw(this, delta);
         sys_ui(this, delta);
     }
 }

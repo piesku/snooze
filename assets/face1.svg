@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="128"
+   height="128"
+   viewBox="0 0 33.866667 33.866667"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <g
+     id="layer1">
+    <circle
+       style="fill:#ffc022;fill-rule:evenodd;stroke-width:0.264583"
+       id="path31"
+       cx="17.073444"
+       cy="17.181675"
+       r="15.1794" />
+    <rect
+       style="fill:#ff6600;stroke-width:0.23141"
+       id="rect279"
+       width="5.3033204"
+       height="7.8467493"
+       x="14.611188"
+       y="12.230106"
+       ry="2.6516602" />
+    <path
+       style="fill:none;stroke:#804d00;stroke-width:1.065;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 5.9499869,12.482114 c 2.9229293,2.182165 6.1879901,1.090377 7.4739431,0.02842"
+       id="path682" />
+    <path
+       style="fill:none;stroke:#804d00;stroke-width:1.065;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 21.10233,12.427998 c 2.92293,2.182165 6.18799,1.090377 7.473943,0.02842"
+       id="path2297" />
+    <rect
+       style="fill:#804d00;stroke-width:0.192763"
+       id="rect2299"
+       width="3.6798551"
+       height="7.8467493"
+       x="-11.066623"
+       y="6.4126883"
+       ry="1.8399276"
+       transform="rotate(-90)" />
+    <rect
+       style="fill:#804d00;stroke-width:0.192763"
+       id="rect2454"
+       width="3.6798551"
+       height="7.8467493"
+       x="-11.174853"
+       y="19.346296"
+       ry="1.8399276"
+       transform="rotate(-90)" />
+    <ellipse
+       style="fill:#ff4141;stroke:#ff6600;stroke-width:1.065;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path2500"
+       cx="17.452253"
+       cy="23.432016"
+       rx="3.8151436"
+       ry="0.59527063" />
+  </g>
+</svg>
