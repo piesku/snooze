@@ -10859,8 +10859,9 @@ font-weight: 800;
 text-transform: uppercase;
 color: white;
 background: none;
+padding: 5px 20px;
 border: 10px solid white;
-border-radius: 10px;
+border-radius: 50px;
 "
 >
 Let's go
@@ -11109,7 +11110,7 @@ rigid_body(1 /* Dynamic */),
 audio_source(false),
 audio_listener(),
 children([
-transform([0, 0.7, 0]),
+transform([0, 0.75, 0]),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshBody, [
 224 / 255,
 114 / 255,
@@ -11169,7 +11170,7 @@ render_colored_shadows(game2.MaterialColoredShadows, game2.MeshBody, [
 ])
 ])
 ], [
-transform([0, 0.7, 0]),
+transform([0, 0.75, 0]),
 animate({
 idle: {
 Flags: 0 /* None */,
