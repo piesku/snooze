@@ -4,14 +4,8 @@ import {float} from "../../common/random.js";
 import {blueprint_camera_follow} from "../blueprints/blu_camera_follow.js";
 import {blueprint_ground} from "../blueprints/blu_ground.js";
 import {blueprint_hand} from "../blueprints/blu_hand.js";
-import {blueprint_item} from "../blueprints/blu_item.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
-import {children} from "../components/com_children.js";
-import {control_always} from "../components/com_control_always.js";
 import {light_directional} from "../components/com_light.js";
-import {move} from "../components/com_move.js";
-import {shake} from "../components/com_shake.js";
-import {spawn} from "../components/com_spawn.js";
 import {transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 import {World} from "../world.js";
@@ -47,17 +41,6 @@ export function scene_stage(game: Game) {
 
     // Camera.
     instantiate(game, [...blueprint_camera_follow(game), transform([0, 1000, 1000], [0, 1, 0, 0])]);
-
-    // Item spawner.
-    instantiate(game, [
-        transform([0, 15, 0]),
-        control_always(null, [0, 1, 0, 0]),
-        move(0, 1),
-        children([
-            transform([0, 0, 10]),
-            children([transform(), shake(10), spawn(blueprint_item, 3)]),
-        ]),
-    ]);
 
     for (let i = 0; i < 100; i++) {
         instantiate(game, [
