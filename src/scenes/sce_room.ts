@@ -35,7 +35,7 @@ export function scene_room(game: Game) {
         move(0, 1),
         children([
             transform([0, 0, 5]),
-            children([transform(), shake(5), spawn(blueprint_note, 1)]),
+            children([transform(), shake(3), spawn(blueprint_note, 1.5)]),
         ]),
     ]);
 }
