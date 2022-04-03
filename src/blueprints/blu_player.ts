@@ -30,7 +30,7 @@ export function blueprint_player(game: Game) {
         children(
             // Body.
             [
-                transform([0, 0.7, 0]),
+                transform([0, 0.75, 0]),
                 render_colored_shadows(game.MaterialColoredShadows, game.MeshBody, [
                     224 / 0xff,
                     114 / 0xff,
@@ -97,7 +97,7 @@ export function blueprint_player(game: Game) {
             ],
             // Axel.
             [
-                transform([0, 0.7, 0]),
+                transform([0, 0.75, 0]),
                 animate({
                     idle: {
                         Flags: AnimationFlag.None,

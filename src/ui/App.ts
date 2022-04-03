@@ -38,8 +38,9 @@ export function Title(game: Game) {
                         text-transform: uppercase;
                         color: white;
                         background: none;
+                        padding: 5px 20px;
                         border: 10px solid white;
-                        border-radius: 10px;
+                        border-radius: 50px;
                     "
                 >
                     Let's go
