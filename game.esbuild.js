@@ -375,7 +375,11 @@
         }
         break;
       }
-      case 1 /* CollectItem */: {
+      case 1 /* GameStart */: {
+        game2.PlayState = "playing";
+        break;
+      }
+      case 2 /* CollectItem */: {
         let [item_entity] = payload;
         destroy_all(game2.World, item_entity);
         game2.ItemsCollected++;
@@ -9860,6 +9864,12 @@
     if (control.Rotation) {
       multiply(move2.LocalRotation, move2.LocalRotation, control.Rotation);
     }
+    if (control.Animation) {
+      for (let ent of query_down(game2.World, entity, 1 /* Animate */)) {
+        let animate2 = game2.World.Animate[ent];
+        animate2.Trigger = control.Animation;
+      }
+    }
   }
 
   // ../src/systems/sys_control_jump.ts
@@ -10248,6 +10258,18 @@
     } else if (rigid_body2.Kind === 2 /* Kinematic */) {
       copy(rigid_body2.VelocityResolved, rigid_body2.VelocityIntegrated);
     }
+  }
+
+  // ../src/components/com_task.ts
+  function task_until(predicate, on_done) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] |= 1048576 /* Task */;
+      game2.World.Task[entity] = {
+        Kind: 0 /* Until */,
+        Predicate: predicate,
+        OnDone: on_done
+      };
+    };
   }
 
   // ../src/systems/sys_poll.ts
@@ -10801,64 +10823,51 @@
     return strings.reduce((out, cur) => out + shift(values) + cur);
   }
 
-  // ../src/ui/Fullscreen.ts
-  function Fullscreen() {
-    return html`
-        <div
-            style="
-                position: absolute;
-                top: 1vmin;
-                left: 1vmin;
-                background: #000;
-                color: #fff;
-                font: 13px Arial;
-            "
-        >
-            <button
-                onclick="$(${0 /* ToggleFullscreen */})"
-                style="
-                    padding: 1vmin;
-                    background: #000;
-                    color: #fff;
-                    border: none;
-                "
-            >
-                ${document.fullscreenElement ? "Exit Fullscreen" : "Enter Fullscreen"}
-            </button>
-        </div>
-    `;
-  }
-
-  // ../src/ui/Score.ts
-  function Score(game2) {
-    return html`
-        <div
-            style="
-                position: absolute;
-                right: 0;
-                bottom: 0;
-                left: 0;
-                height: 10vmin;
-
-                display: flex;
-                justify-content: space-around;
-                align-items: center;
-
-                background: rgba(0, 0, 0, 0.5);
-                color: #fff;
-                font: 24px Impact;
-                font-style: italic;
-            "
-        >
-            <div>Collected: ${game2.ItemsCollected}</div>
-            <div>Distance: ${-game2.DistanceTraveled.toFixed(0)}</div>
-        </div>
-    `;
-  }
-
   // ../src/ui/App.ts
   function App(game2) {
-    return html`<div>${Fullscreen()} ${Score(game2)}</div>`;
+    switch (game2.PlayState) {
+      case "title":
+        return Title(game2);
+      default:
+        return "";
+    }
+  }
+  function Title(game2) {
+    return html`
+        <div
+            style="
+                padding: 1vmin;
+                font-family: Helvetica, Arial, sans-serif;
+                text-transform: uppercase;
+                color: white;
+            "
+        >
+            <div
+                style="
+                    font-size: 15vmin;
+                    font-weight: 800;
+                "
+            >
+                You are the snooze button.
+            </div>
+            <div>
+                <button
+                    onclick="$(${1 /* GameStart */})"
+                    style="
+                        font-size: 10vmin;
+                        font-weight: 800;
+                        text-transform: uppercase;
+                        color: white;
+                        background: none;
+                        border: 10px solid white;
+                        border-radius: 10px;
+                    "
+                >
+                    Let's go
+                </button>
+            </div>
+        </div>
+    `;
   }
 
   // ../src/systems/sys_ui.ts
@@ -10887,6 +10896,7 @@
       this.Targets = {
         Sun: create_depth_target(this.Gl, 4096, 4096)
       };
+      this.PlayState = "title";
       this.ItemsCollected = 0;
       this.DistanceTraveled = 0;
       this.PlatformsTraveled = 0;
@@ -10904,9 +10914,9 @@
       sys_poll(this, delta);
       sys_resize(this, delta);
       sys_camera(this, delta);
+      sys_control_always(this, delta);
       sys_control_keyboard(this, delta);
       sys_control_jump(this, delta);
-      sys_control_always(this, delta);
       sys_animate(this, delta);
       sys_move(this, delta);
       sys_mimic(this, delta);
@@ -10959,7 +10969,7 @@
   // ../src/blueprints/blu_camera_follow.ts
   function blueprint_camera_follow(game2) {
     return [
-      mimic(first_named(game2.World, "camera anchor")),
+      mimic(first_named(game2.World, "title camera anchor")),
       children([
         transform([0, 1, -6], [0, 1, 0, 0]),
         camera_canvas(perspective(1, 0.1, 1e3), [170 / 255, 199 / 255, 172 / 255, 1])
@@ -11019,12 +11029,13 @@
   }
 
   // ../src/components/com_control_always.ts
-  function control_always(direction, rotation) {
+  function control_always(direction, rotation, animation) {
     return (game2, entity) => {
       game2.World.Signature[entity] |= 64 /* ControlAlways */;
       game2.World.ControlAlways[entity] = {
         Direction: direction,
-        Rotation: rotation
+        Rotation: rotation,
+        Animation: animation
       };
     };
   }
@@ -11040,6 +11051,13 @@
         MinPitch: min_pitch,
         MaxPitch: max_pitch
       };
+    };
+  }
+
+  // ../src/components/com_disable.ts
+  function disable(mask) {
+    return (game2, entity) => {
+      game2.World.Signature[entity] &= ~mask;
     };
   }
 
@@ -11083,8 +11101,9 @@
   function blueprint_player(game2) {
     return [
       control_player(true, 0.2, 0),
-      control_always([0, 0, 1], null),
-      move(15, 3),
+      control_always([0, 0, 1], null, "move"),
+      disable(64 /* ControlAlways */),
+      move(10, 3),
       collide(true, 1 /* Player */, 2 /* Terrain */),
       rigid_body(1 /* Dynamic */),
       audio_source(false),
@@ -11131,11 +11150,38 @@
             ],
             Flags: 0 /* None */
           }
-        })
+        }),
+        children([
+          transform([0, 0, 1], [0.707, 0, 0, 0.707], [0.7, 0.1, 0.6]),
+          render_colored_shadows(game2.MaterialColoredShadows, game2.MeshBody, [
+            200 / 255,
+            231 / 255,
+            229 / 255,
+            1
+          ])
+        ], [
+          transform([0, 1, 0], [0, 0, 0, 1], [0.6, 0.2, 0.5]),
+          render_colored_shadows(game2.MaterialColoredShadows, game2.MeshBody, [
+            174 / 255,
+            248 / 255,
+            181 / 255,
+            1
+          ])
+        ])
       ], [
         transform([0, 0.7, 0]),
         animate({
           idle: {
+            Flags: 0 /* None */,
+            Keyframes: [
+              {
+                Timestamp: 0,
+                Rotation: [0, 0, 0, 1]
+              }
+            ]
+          },
+          move: {
+            Flags: 2 /* Loop */,
             Keyframes: [
               {
                 Timestamp: 0,
@@ -11149,8 +11195,7 @@
                 Timestamp: 1,
                 Rotation: [0, 0, 0, -1]
               }
-            ],
-            Flags: 2 /* Loop */
+            ]
           }
         }),
         children([
@@ -11172,7 +11217,7 @@
         ])
       ], [
         transform(void 0, from_euler([0, 0, 0, 1], 15, 0, 0)),
-        named("camera anchor"),
+        named("player camera anchor"),
         move(0, 3),
         control_player(false, 0, 0.2, -10, 15)
       ], [transform([0, 2, 0]), light_point([1, 1, 1], 5)])
@@ -11194,11 +11239,10 @@
   function scene_room(game2) {
     game2.World = new World();
     game2.ViewportResized = true;
-    instantiate(game2, [
+    let player = instantiate(game2, [
       ...blueprint_player(game2),
-      transform([0, 1, 0], [0, 1, 0, 0], [0.5, 0.5, 0.5])
+      transform([0, 7, 48], [0, 1, 0, 0], [0.5, 0.5, 0.5])
     ]);
-    instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 1, 0], [0, 1, 0, 0])]);
     instantiate(game2, [
       ...blueprint_sun(game2),
       transform(void 0, from_euler([0, 0, 0, 0], -45, 45, 0))
@@ -11216,6 +11260,30 @@
           1
         ])
       ])
+    ]);
+    instantiate(game2, [
+      transform([0, 3, 48], void 0, [5, 6, 5]),
+      collide(false, 2 /* Terrain */, 0 /* None */),
+      rigid_body(0 /* Static */),
+      children([
+        transform(),
+        render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
+          221 / 255,
+          157 / 255,
+          105 / 255,
+          1
+        ])
+      ], [
+        transform([0.1, 0.5, 0], from_euler([0, 0, 0, 1], 0, 15, 0)),
+        named("title camera anchor")
+      ])
+    ]);
+    let camera = instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 10, 0])]);
+    instantiate(game2, [
+      task_until(() => game2.PlayState === "playing", () => {
+        mimic(first_named(game2.World, "player camera anchor"))(game2, camera);
+        game2.World.Signature[player] |= 64 /* ControlAlways */;
+      })
     ]);
   }
 
