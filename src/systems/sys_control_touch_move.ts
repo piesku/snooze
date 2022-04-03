@@ -8,7 +8,7 @@ import {Has} from "../world.js";
 const QUERY = Has.Move | Has.ControlPlayer;
 const AXIS_Y: Vec3 = [0, 1, 0];
 const AXIS_X: Vec3 = [1, 0, 0];
-const DEAD_ZONE = 0.01;
+const DEAD_ZONE = 0.1;
 const TOUCH_SENSITIVITY = 10;
 
 // The position of the joystick center, given by the initial Touch0's x and y.
@@ -21,8 +21,6 @@ export function sys_control_touch_move(game: Game, delta: number) {
         // first touch of the first finger on the screen's surface.
         joystick[0] = game.InputState["Touch0X"];
         joystick[1] = game.InputState["Touch0Y"];
-
-        console.log(joystick);
     }
 
     for (let i = 0; i < game.World.Signature.length; i++) {
@@ -37,12 +35,13 @@ function update(game: Game, entity: Entity) {
     let control = game.World.ControlPlayer[entity];
     let move = game.World.Move[entity];
 
-    if (control.Yaw && game.InputDelta["Touch0X"]) {
-        let amount = game.InputDelta["Touch0X"] * control.Yaw * TOUCH_SENSITIVITY * DEG_TO_RAD;
-        // See sys_control_mouse.
-        from_axis(rotation, AXIS_Y, -amount);
-        multiply(transform.Rotation, rotation, transform.Rotation);
-        game.World.Signature[entity] |= Has.Dirty;
+    if (control.Yaw && game.InputState["Touch0"] === 1) {
+        let divisor = Math.min(game.ViewportWidth, game.ViewportHeight) / 4;
+        let amount_x = (game.InputState["Touch0X"] - joystick[0]) / divisor;
+        if (Math.abs(amount_x) > DEAD_ZONE) {
+            multiply(move.LocalRotation, move.LocalRotation, [0, -clamp(-1, 1, amount_x), 0, 0]);
+            game.World.Signature[entity] |= Has.Dirty;
+        }
     }
 
     if (control.Pitch && game.InputDelta["Touch0Y"]) {

@@ -18,7 +18,10 @@ function update(game: Game, entity: Entity) {
     let rigid_body = game.World.RigidBody[entity];
 
     if (control.Jump) {
-        if (game.InputState["ArrowUp"]) {
+        if (
+            game.InputState["ArrowUp"] ||
+            (game.InputDelta["Touch0"] === -1 && game.InputDistance["Touch0"] < 10)
+        ) {
             // Jump
             if (!rigid_body.IsAirborne) {
                 rigid_body.Acceleration[1] += 200;
@@ -28,7 +31,5 @@ function update(game: Game, entity: Entity) {
                 }
             }
         }
-
-        // TODO: Implement touch and gamepad controls for jumping.
     }
 }
