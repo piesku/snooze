@@ -6,7 +6,6 @@ import {Game} from "../game.js";
 import {Has} from "../world.js";
 
 const QUERY = Has.Move | Has.ControlPlayer;
-const AXIS_Y: Vec3 = [0, 1, 0];
 const AXIS_X: Vec3 = [1, 0, 0];
 const DEAD_ZONE = 0.1;
 const TOUCH_SENSITIVITY = 10;
@@ -40,7 +39,6 @@ function update(game: Game, entity: Entity) {
         let amount_x = (game.InputState["Touch0X"] - joystick[0]) / divisor;
         if (Math.abs(amount_x) > DEAD_ZONE) {
             multiply(move.LocalRotation, move.LocalRotation, [0, -clamp(-1, 1, amount_x), 0, 0]);
-            game.World.Signature[entity] |= Has.Dirty;
         }
     }
 
