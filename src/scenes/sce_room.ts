@@ -5,21 +5,19 @@ import {blueprint_player} from "../blueprints/blu_player.js";
 import {blueprint_sun} from "../blueprints/blu_sun.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
-import {mimic} from "../components/com_mimic.js";
-import {first_named, named} from "../components/com_named.js";
+import {named} from "../components/com_named.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
-import {task_until} from "../components/com_task.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
-import {Has, World} from "../world.js";
+import {World} from "../world.js";
 
 export function scene_room(game: Game) {
     game.World = new World();
     game.ViewportResized = true;
 
     // Player.
-    let player = instantiate(game, [
+    instantiate(game, [
         ...blueprint_player(game),
         transform([0, 7, 48], [0, 1, 0, 0], [0.5, 0.5, 0.5]),
     ]);
@@ -69,24 +67,5 @@ export function scene_room(game: Game) {
     ]);
 
     // Camera.
-    let camera = instantiate(game, [...blueprint_camera_follow(game), transform([0, 10, 0])]);
-
-    // The intro.
-    instantiate(game, [
-        task_until(
-            () => game.PlayState === "playing",
-            () => {
-                // The camera follows the player.
-                mimic(first_named(game.World, "player camera anchor"))(game, camera);
-
-                // The player keeps moving.
-                game.World.Signature[player] |= Has.ControlAlways;
-
-                // The spawner spawns hands.
-                let spawner_anchor = first_named(game.World, "hand spawner anchor");
-                let spawner_entity = game.World.Children[spawner_anchor].Children[0];
-                game.World.Signature[spawner_entity] |= Has.Spawn;
-            }
-        ),
-    ]);
+    instantiate(game, [...blueprint_camera_follow(game), transform([0, 10, 0])]);
 }
