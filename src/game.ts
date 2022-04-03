@@ -12,7 +12,6 @@ import {sys_audio_source} from "./systems/sys_audio_source.js";
 import {sys_camera} from "./systems/sys_camera.js";
 import {sys_collide} from "./systems/sys_collide.js";
 import {sys_control_always} from "./systems/sys_control_always.js";
-import {sys_control_endless} from "./systems/sys_control_endless.js";
 import {sys_control_jump} from "./systems/sys_control_jump.js";
 import {sys_control_keyboard} from "./systems/sys_control_keyboard.js";
 import {sys_debug} from "./systems/sys_debug.js";
@@ -53,7 +52,7 @@ export class Game extends Game3D {
     override Targets: {
         [k: string]: RenderTarget;
     } = {
-        Sun: create_depth_target(this.Gl, 1024, 1024),
+        Sun: create_depth_target(this.Gl, 4096, 4096),
     };
 
     ItemsCollected = 0;
@@ -85,7 +84,6 @@ export class Game extends Game3D {
 
         // AI.
         sys_control_always(this, delta);
-        sys_control_endless(this, delta);
 
         // Game logic.
         sys_animate(this, delta);

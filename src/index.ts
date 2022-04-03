@@ -1,9 +1,9 @@
 import {dispatch} from "./actions.js";
 import {Game} from "./game.js";
-import {scene_run} from "./scenes/sce_run.js";
+import {scene_room} from "./scenes/sce_room.js";
 
 let game = new Game();
-scene_run(game);
+scene_room(game);
 game.Start();
 
 // @ts-ignore

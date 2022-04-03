@@ -8,9 +8,9 @@ import {Game} from "../game.js";
 export function blueprint_sun(game: Game) {
     return [
         children([
-            transform([0, 0, 10]),
+            transform([0, 0, 100]),
             light_directional([1, 1, 1], 0.3),
-            camera_target(game.Targets.Sun, orthographic(15, 1, 100)),
+            camera_target(game.Targets.Sun, orthographic(73, 35, 150)),
         ]),
     ];
 }
