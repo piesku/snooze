@@ -27,8 +27,8 @@ export function blueprint_player(game: Game) {
         children(
             // Body.
             [
-                transform(),
-                render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+                transform([0, 0.7, 0]),
+                render_colored_shadows(game.MaterialColoredShadows, game.MeshBody, [
                     224 / 0xff,
                     114 / 0xff,
                     128 / 0xff,
@@ -69,6 +69,49 @@ export function blueprint_player(game: Game) {
                         Flags: AnimationFlag.None,
                     },
                 }),
+            ],
+            // Axel.
+            [
+                transform([0, 0.7, 0]),
+                animate({
+                    idle: {
+                        Keyframes: [
+                            {
+                                Timestamp: 0,
+                                Rotation: [0, 0, 0, 1],
+                            },
+                            {
+                                Timestamp: 0.5,
+                                Rotation: [1, 0, 0, 0],
+                            },
+                            {
+                                Timestamp: 1,
+                                Rotation: [0, 0, 0, -1],
+                            },
+                        ],
+                        Flags: AnimationFlag.Loop,
+                    },
+                }),
+                children(
+                    [
+                        transform([-1.8, 0, 0]),
+                        render_colored_shadows(game.MaterialColoredShadows, game.MeshWheel, [
+                            240 / 0xff,
+                            202 / 0xff,
+                            82 / 0xff,
+                            1,
+                        ]),
+                    ],
+                    [
+                        transform([1.8, 0, 0]),
+                        render_colored_shadows(game.MaterialColoredShadows, game.MeshWheel, [
+                            240 / 0xff,
+                            202 / 0xff,
+                            82 / 0xff,
+                            1,
+                        ]),
+                    ]
+                ),
             ],
             // Camera rig anchor.
             [

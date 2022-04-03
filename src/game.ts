@@ -5,7 +5,9 @@ import {mat_forward_colored_shadows} from "../materials/mat_forward_colored_shad
 import {mat_forward_colored_wireframe} from "../materials/mat_forward_colored_unlit.js";
 import {mat_forward_depth} from "../materials/mat_forward_depth.js";
 import {mat_forward_particles_colored} from "../materials/mat_forward_particles_colored.js";
+import {mesh_body} from "../meshes/body.js";
 import {mesh_cube} from "../meshes/cube.js";
+import {mesh_wheel} from "../meshes/wheel.js";
 import {sys_animate} from "./systems/sys_animate.js";
 import {sys_audio_listener} from "./systems/sys_audio_listener.js";
 import {sys_audio_source} from "./systems/sys_audio_source.js";
@@ -45,6 +47,8 @@ export class Game extends Game3D {
     MaterialDepth = mat_forward_depth(this.Gl);
 
     MeshCube = mesh_cube(this.Gl);
+    MeshBody = mesh_body(this.Gl);
+    MeshWheel = mesh_wheel(this.Gl);
 
     LightPositions = new Float32Array(4 * MAX_FORWARD_LIGHTS);
     LightDetails = new Float32Array(4 * MAX_FORWARD_LIGHTS);
