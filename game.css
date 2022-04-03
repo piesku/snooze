@@ -17,3 +17,7 @@ main {
 [onclick] {
     cursor: pointer;
 }
+
+img {
+    display: none;
+}
