@@ -53,7 +53,7 @@ export class Game extends Game3D {
     override Targets: {
         [k: string]: RenderTarget;
     } = {
-        Sun: create_depth_target(this.Gl, 2048, 2048),
+        Sun: create_depth_target(this.Gl, 1024, 1024),
     };
 
     ItemsCollected = 0;
