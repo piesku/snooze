@@ -29167,7 +29167,7 @@
     let control = game2.World.ControlPlayer[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (control.Jump) {
-      if (game2.InputState["ArrowUp"]) {
+      if (game2.InputState["ArrowUp"] || game2.InputDelta["Touch0"] === -1 && game2.InputDistance["Touch0"] < 10) {
         if (!rigid_body2.IsAirborne) {
           rigid_body2.Acceleration[1] += 200;
           for (let ent of query_down(game2.World, entity, 1 /* Animate */)) {
@@ -29212,8 +29212,8 @@
 
   // ../src/systems/sys_control_touch_move.ts
   var QUERY9 = 32768 /* Move */ | 128 /* ControlPlayer */;
-  var AXIS_Y = [0, 1, 0];
   var AXIS_X = [1, 0, 0];
+  var DEAD_ZONE = 0.1;
   var TOUCH_SENSITIVITY = 10;
   var joystick = [0, 0];
   var rotation = [0, 0, 0, 0];
@@ -29221,7 +29221,6 @@
     if (game2.InputDelta["Touch0"] === 1) {
       joystick[0] = game2.InputState["Touch0X"];
       joystick[1] = game2.InputState["Touch0Y"];
-      console.log(joystick);
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
@@ -29233,11 +29232,13 @@
     let transform2 = game2.World.Transform[entity];
     let control = game2.World.ControlPlayer[entity];
     let move2 = game2.World.Move[entity];
-    if (control.Yaw && game2.InputDelta["Touch0X"]) {
-      let amount = game2.InputDelta["Touch0X"] * control.Yaw * TOUCH_SENSITIVITY * DEG_TO_RAD;
-      from_axis(rotation, AXIS_Y, -amount);
-      multiply(transform2.Rotation, rotation, transform2.Rotation);
-      game2.World.Signature[entity] |= 512 /* Dirty */;
+    if (control.Yaw && game2.InputState["Touch0"] === 1) {
+      let divisor = Math.min(game2.ViewportWidth, game2.ViewportHeight) / 4;
+      let amount_x = (game2.InputState["Touch0X"] - joystick[0]) / divisor;
+      if (Math.abs(amount_x) > DEAD_ZONE) {
+        multiply(move2.LocalRotation, move2.LocalRotation, [0, -clamp(-1, 1, amount_x), 0, 0]);
+        game2.World.Signature[entity] |= 512 /* Dirty */;
+      }
     }
     if (control.Pitch && game2.InputDelta["Touch0Y"]) {
       let current_pitch = get_pitch(transform2.Rotation);
