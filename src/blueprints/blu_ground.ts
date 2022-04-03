@@ -13,10 +13,15 @@ export function blueprint_ground(game: Game) {
     return [
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        lifespan(10),
+        lifespan(30),
         children([
             transform(),
-            render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [0, 1, 0.1, 1]),
+            render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+                221 / 255,
+                157 / 255,
+                105 / 255,
+                1,
+            ]),
             animate({
                 idle: {
                     Flags: AnimationFlag.None,

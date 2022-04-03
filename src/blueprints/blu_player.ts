@@ -28,11 +28,12 @@ export function blueprint_player(game: Game) {
             // Body.
             [
                 transform(),
-                render_colored_shadows(
-                    game.MaterialColoredShadows,
-                    game.MeshCube,
-                    [1, 0.3, 0.2, 1]
-                ),
+                render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+                    224 / 0xff,
+                    114 / 0xff,
+                    128 / 0xff,
+                    1,
+                ]),
                 animate({
                     idle: {
                         Keyframes: [

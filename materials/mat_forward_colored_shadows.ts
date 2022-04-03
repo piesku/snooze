@@ -67,9 +67,9 @@ let fragment = `#version 300 es\n
         vec3 view_normal = normalize(view_dir);
 
         // Ambient light.
-        vec3 light_acc = GAMMA_DECODE(diffuse_color.rgb) * 0.1;
+        vec3 light_acc = GAMMA_DECODE(diffuse_color.rgb);
 
-        for (int i = 0; i < ${MAX_FORWARD_LIGHTS}; i++) {
+        for (int i = 0; i < 0; i++) {
             int light_kind = int(light_positions[i].w);
             if (light_kind == ${LightKind.Inactive}) {
                 break;
