@@ -29,7 +29,7 @@ export function spawn(creator: Creator, interval: number) {
         game.World.Spawn[entity] = {
             Creator: creator,
             Interval: interval,
-            SinceLast: interval,
+            SinceLast: 0,
         };
     };
 }
