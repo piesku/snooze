@@ -62,7 +62,7 @@ let create_instance = (name, translation, rotation, scale) => {
             return `
     instantiate(game, [
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
-        collide(false, Layer.Terrain, Layer.None),
+        collide(false, Layer.Ground, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
     ]);`;
@@ -70,7 +70,7 @@ let create_instance = (name, translation, rotation, scale) => {
             return `
     instantiate(game, [
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
-        collide(false, Layer.Terrain, Layer.None),
+        collide(false, Layer.Obstacle, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
         cull(Has.Render),
@@ -79,7 +79,7 @@ let create_instance = (name, translation, rotation, scale) => {
             return `
     instantiate(game, [
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
-        collide(false, Layer.Terrain, Layer.None),
+        collide(false, Layer.Obstacle, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, ${color(
             221,

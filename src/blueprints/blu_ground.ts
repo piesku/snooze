@@ -11,7 +11,7 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_ground(game: Game) {
     return [
-        collide(false, Layer.Terrain, Layer.None),
+        collide(false, Layer.Ground, Layer.None),
         rigid_body(RigidKind.Static),
         lifespan(30),
         children([

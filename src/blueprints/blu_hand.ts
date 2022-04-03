@@ -9,7 +9,12 @@ import {Game, Layer} from "../game.js";
 
 export function blueprint_hand(game: Game) {
     return [
-        collide(true, Layer.Obstacle, Layer.Terrain | Layer.Player, [0.4, 0.2, 0.6]),
+        collide(
+            true,
+            Layer.Obstacle,
+            Layer.Ground | Layer.Obstacle | Layer.Player,
+            [0.4, 0.2, 0.6]
+        ),
         rigid_body(RigidKind.Dynamic, 0.3),
         callback((game, entity) => {
             let rigid_body = game.World.RigidBody[entity];

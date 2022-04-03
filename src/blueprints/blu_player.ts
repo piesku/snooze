@@ -30,7 +30,7 @@ export function blueprint_player(game: Game) {
             }
         ),
         move(1.5, 3),
-        collide(true, Layer.Player, Layer.Terrain, [2.8, 2.6, 2]),
+        collide(true, Layer.Player, Layer.Ground | Layer.Obstacle, [2.8, 2.6, 2]),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
         audio_listener(),
