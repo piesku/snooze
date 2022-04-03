@@ -8,7 +8,6 @@ import {collide} from "../components/com_collide.js";
 import {control_always} from "../components/com_control_always.js";
 import {control_player} from "../components/com_control_player.js";
 import {disable} from "../components/com_disable.js";
-import {light_point} from "../components/com_light.js";
 import {move} from "../components/com_move.js";
 import {named} from "../components/com_named.js";
 import {render_colored_shadows} from "../components/com_render.js";
@@ -16,6 +15,7 @@ import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
 import {Has} from "../world.js";
+import {blueprint_spawner} from "./blu_spawner.js";
 
 export function blueprint_player(game: Game) {
     return [
@@ -147,15 +147,13 @@ export function blueprint_player(game: Game) {
                     ]
                 ),
             ],
-            // Camera rig anchor.
             [
-                transform(undefined, from_euler([0, 0, 0, 1], 15, 0, 0)),
                 named("player camera anchor"),
+                transform(undefined, from_euler([0, 0, 0, 1], 15, 0, 0)),
                 move(0, 3),
                 control_player(false, 0, 0.2, -10, 15),
             ],
-            // Overhead light.
-            [transform([0, 2, 0]), light_point([1, 1, 1], 5)]
+            [named("hand spawner anchor"), transform([0, 25, 25]), ...blueprint_spawner(game)]
         ),
     ];
 }

@@ -28,8 +28,6 @@ export function Title(game: Game) {
                 "
             >
                 You are the snooze button.
-            </div>
-            <div>
                 <button
                     onclick="$(${Action.GameStart})"
                     style="

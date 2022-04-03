@@ -3,8 +3,8 @@ import {from_euler} from "../../common/quat.js";
 import {float} from "../../common/random.js";
 import {blueprint_camera_follow} from "../blueprints/blu_camera_follow.js";
 import {blueprint_ground} from "../blueprints/blu_ground.js";
+import {blueprint_hand} from "../blueprints/blu_hand.js";
 import {blueprint_item} from "../blueprints/blu_item.js";
-import {blueprint_obstacle} from "../blueprints/blu_obstacle.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
 import {children} from "../components/com_children.js";
 import {control_always} from "../components/com_control_always.js";
@@ -66,7 +66,7 @@ export function scene_stage(game: Game) {
                 float(0.5, 1.5),
                 float(0.5, 1.5),
             ]),
-            ...blueprint_obstacle(game),
+            ...blueprint_hand(game),
         ]);
     }
 }

@@ -76,8 +76,16 @@ export function scene_room(game: Game) {
         task_until(
             () => game.PlayState === "playing",
             () => {
+                // The camera follows the player.
                 mimic(first_named(game.World, "player camera anchor"))(game, camera);
+
+                // The player keeps moving.
                 game.World.Signature[player] |= Has.ControlAlways;
+
+                // The spawner spawns hands.
+                let spawner_anchor = first_named(game.World, "hand spawner anchor");
+                let spawner_entity = game.World.Children[spawner_anchor].Children[0];
+                game.World.Signature[spawner_entity] |= Has.Spawn;
             }
         ),
     ]);
