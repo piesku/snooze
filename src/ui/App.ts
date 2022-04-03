@@ -31,13 +31,14 @@ export function Title(game: Game) {
                 <button
                     onclick="$(${Action.GameStart})"
                     style="
-                        font-size: 10vmin;
+                        font-size: 5vmin;
                         font-weight: 800;
                         text-transform: uppercase;
                         color: white;
                         background: none;
-                        padding: 5px 20px;
-                        border: 10px solid white;
+                        padding: 1vmin 3vmin;
+                        vertical-align: 4vmin;
+                        border: 2vmin solid white;
                         border-radius: 50px;
                     "
                 >
