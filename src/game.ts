@@ -68,7 +68,7 @@ export class Game extends Game3D {
 
     PlayState: "title" | "playing" | "win" | "lose" = "title";
 
-    Sleepiness = 5;
+    Sleepiness = 3;
     DistanceTraveled = 0;
     PlatformsTraveled = 0;
 

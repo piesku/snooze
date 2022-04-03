@@ -10,16 +10,32 @@ import {Game} from "../game.js";
 export function blueprint_camera_follow(game: Game) {
     return [
         mimic(first_named(game.World, "title camera anchor")),
-        task_when(
-            () => game.PlayState === "playing",
-            (entity) => {
-                // The camera follows the player.
-                mimic(first_named(game.World, "player camera anchor"))(game, entity);
-            }
+        children(
+            [
+                transform([0, 0.1, -1], [0, 1, 0, 0]),
+                camera_canvas(perspective(1, 0.1, 1000), [170 / 255, 199 / 255, 172 / 255, 1]),
+            ],
+            [
+                transform(),
+                task_when(
+                    () => game.PlayState === "playing",
+                    (entity) => {
+                        // The camera follows the player.
+                        let parent = game.World.Transform[entity].Parent!;
+                        mimic(first_named(game.World, "player camera anchor"))(game, parent);
+                    }
+                ),
+            ],
+            [
+                transform(),
+                task_when(
+                    () => game.PlayState === "win",
+                    (entity) => {
+                        let parent = game.World.Transform[entity].Parent!;
+                        mimic(first_named(game.World, "title camera anchor"))(game, parent);
+                    }
+                ),
+            ]
         ),
-        children([
-            transform([0, 0.1, -1], [0, 1, 0, 0]),
-            camera_canvas(perspective(1, 0.1, 1000), [170 / 255, 199 / 255, 172 / 255, 1]),
-        ]),
     ];
 }

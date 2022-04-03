@@ -23,18 +23,36 @@ export function blueprint_player(game: Game) {
         control_player(true, 0.2, 0),
         control_always([0, 0, 1], null, "move"),
         disable(Has.ControlAlways),
-        task_when(
-            () => game.PlayState === "playing",
-            (entity) => {
-                game.World.Signature[entity] |= Has.ControlAlways;
-            }
-        ),
         move(1.5, 3),
         collide(true, Layer.Player, Layer.Ground | Layer.Obstacle, [2.8, 2.6, 2]),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
         audio_listener(),
         children(
+            [
+                transform(),
+                task_when(
+                    () => game.PlayState === "playing",
+                    (entity) => {
+                        let parent = game.World.Transform[entity].Parent!;
+                        game.World.Signature[parent] |= Has.ControlAlways;
+                    }
+                ),
+            ],
+            [
+                transform(),
+                task_when(
+                    () => game.PlayState === "win",
+                    (entity) => {
+                        let parent = game.World.Transform[entity].Parent!;
+                        game.World.Signature[parent] &= ~Has.ControlPlayer;
+
+                        let control_always = game.World.ControlAlways[parent];
+                        control_always.Direction = null;
+                        control_always.Animation = "jump";
+                    }
+                ),
+            ],
             // Body.
             [
                 transform(),
