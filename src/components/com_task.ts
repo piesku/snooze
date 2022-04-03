@@ -6,28 +6,28 @@ import {Entity} from "../../common/world.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
-export type Task = TaskUntil | TaskTimeout;
+export type Task = TaskWhen | TaskTimeout;
 
 export const enum TaskKind {
-    Until,
+    When,
     Timeout,
 }
 
 type Predicate = (entity: Entity) => boolean;
 type Callback = (entity: Entity) => void;
 
-export interface TaskUntil {
-    Kind: TaskKind.Until;
+export interface TaskWhen {
+    Kind: TaskKind.When;
     Predicate: Predicate;
     OnDone?: Callback;
 }
 
 /** A task that completes when the predicate returns true. */
-export function task_until(predicate: Predicate, on_done?: Callback) {
+export function task_when(predicate: Predicate, on_done?: Callback) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Task;
         game.World.Task[entity] = {
-            Kind: TaskKind.Until,
+            Kind: TaskKind.When,
             Predicate: predicate,
             OnDone: on_done,
         };

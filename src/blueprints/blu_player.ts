@@ -12,7 +12,7 @@ import {move} from "../components/com_move.js";
 import {named} from "../components/com_named.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
-import {task_until} from "../components/com_task.js";
+import {task_when} from "../components/com_task.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
 import {Has} from "../world.js";
@@ -23,7 +23,7 @@ export function blueprint_player(game: Game) {
         control_player(true, 0.2, 0),
         control_always([0, 0, 1], null, "move"),
         disable(Has.ControlAlways),
-        task_until(
+        task_when(
             () => game.PlayState === "playing",
             (entity) => {
                 game.World.Signature[entity] |= Has.ControlAlways;

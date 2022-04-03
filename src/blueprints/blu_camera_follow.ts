@@ -3,14 +3,14 @@ import {camera_canvas} from "../components/com_camera.js";
 import {children} from "../components/com_children.js";
 import {mimic} from "../components/com_mimic.js";
 import {first_named} from "../components/com_named.js";
-import {task_until} from "../components/com_task.js";
+import {task_when} from "../components/com_task.js";
 import {transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 
 export function blueprint_camera_follow(game: Game) {
     return [
         mimic(first_named(game.World, "title camera anchor")),
-        task_until(
+        task_when(
             () => game.PlayState === "playing",
             (entity) => {
                 // The camera follows the player.

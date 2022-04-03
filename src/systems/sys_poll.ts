@@ -23,7 +23,7 @@ export function sys_poll(game: Game, delta: number) {
 
             let task = game.World.Task[i];
             switch (task.Kind) {
-                case TaskKind.Until: {
+                case TaskKind.When: {
                     if (task.Predicate(i)) {
                         tasks_to_complete.push(i);
                     }
