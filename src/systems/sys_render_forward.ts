@@ -132,9 +132,6 @@ function use_material(game: Game, render: Render, eye: CameraEye) {
         case RenderKind.ColoredShadows:
             game.Gl.useProgram(render.Material.Program);
             game.Gl.uniformMatrix4fv(render.Material.Locations.Pv, false, eye.Pv);
-            game.Gl.uniform3fv(render.Material.Locations.Eye, eye.Position);
-            game.Gl.uniform4fv(render.Material.Locations.LightPositions, game.LightPositions);
-            game.Gl.uniform4fv(render.Material.Locations.LightDetails, game.LightDetails);
 
             game.Gl.activeTexture(GL_TEXTURE0);
             game.Gl.bindTexture(GL_TEXTURE_2D, game.Targets.Sun.DepthTexture);
@@ -216,10 +213,7 @@ function draw_entity(game: Game, entity: Entity, current_target?: WebGLTexture) 
             break;
         case RenderKind.ColoredShadows:
             game.Gl.uniformMatrix4fv(render.Material.Locations.World, false, transform.World);
-            game.Gl.uniformMatrix4fv(render.Material.Locations.Self, false, transform.Self);
-            game.Gl.uniform4fv(render.Material.Locations.DiffuseColor, render.DiffuseColor);
-            game.Gl.uniform4fv(render.Material.Locations.SpecularColor, render.SpecularColor);
-            game.Gl.uniform4fv(render.Material.Locations.EmissiveColor, render.EmissiveColor);
+            game.Gl.uniform4fv(render.Material.Locations.Color, render.DiffuseColor);
             game.Gl.bindVertexArray(render.Mesh.Vao);
             game.Gl.drawElements(
                 render.Material.Mode,

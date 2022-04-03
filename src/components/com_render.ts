@@ -124,23 +124,17 @@ export function render_colored_shaded(
 
 export interface RenderColoredShadows {
     readonly Kind: RenderKind.ColoredShadows;
-    Material: Material<ColoredShadedLayout & ForwardShadingLayout & ShadowMappingLayout>;
+    Material: Material<ColoredUnlitLayout & ShadowMappingLayout>;
     Mesh: Mesh;
     Phase: RenderPhase;
     FrontFace: GLenum;
     DiffuseColor: Vec4;
-    SpecularColor: Vec4;
-    EmissiveColor: Vec4;
 }
 
 export function render_colored_shadows(
-    material: Material<ColoredShadedLayout & ForwardShadingLayout & ShadowMappingLayout>,
+    material: Material<ColoredUnlitLayout & ShadowMappingLayout>,
     mesh: Mesh,
-    diffuse_color: Vec4,
-    shininess: number = 0,
-    emission: number = 0,
-    specular_rgb: Vec3 = [1, 1, 1],
-    front_face: GLenum = GL_CW
+    diffuse_color: Vec4
 ) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Render;
@@ -149,10 +143,8 @@ export function render_colored_shadows(
             Material: material,
             Mesh: mesh,
             Phase: diffuse_color[3] < 1 ? RenderPhase.Transparent : RenderPhase.Opaque,
-            FrontFace: front_face,
+            FrontFace: GL_CW,
             DiffuseColor: diffuse_color,
-            SpecularColor: [...specular_rgb, shininess],
-            EmissiveColor: [diffuse_color[0], diffuse_color[1], diffuse_color[2], emission],
         };
     };
 }

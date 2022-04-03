@@ -21,7 +21,6 @@ import {sys_control_keyboard} from "./systems/sys_control_keyboard.js";
 import {sys_debug} from "./systems/sys_debug.js";
 import {sys_draw} from "./systems/sys_draw.js";
 import {sys_lifespan} from "./systems/sys_lifespan.js";
-import {sys_light} from "./systems/sys_light.js";
 import {sys_mimic} from "./systems/sys_mimic.js";
 import {sys_move} from "./systems/sys_move.js";
 import {sys_particles} from "./systems/sys_particles.js";
@@ -113,7 +112,6 @@ export class Game extends Game3D {
         // Rendering.
         sys_audio_listener(this, delta);
         sys_audio_source(this, delta);
-        sys_light(this, delta);
         sys_render_depth(this, delta);
         sys_render_forward(this, delta);
         sys_draw(this, delta);
