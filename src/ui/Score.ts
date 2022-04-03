@@ -21,7 +21,7 @@ export function Score(game: Game) {
                 font-style: italic;
             "
         >
-            <div>Collected: ${game.ItemsCollected}</div>
+            <div>Collected: ${game.Sleepiness}</div>
             <div>Distance: ${-game.DistanceTraveled.toFixed(0)}</div>
         </div>
     `;

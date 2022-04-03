@@ -21,8 +21,13 @@ import {Has} from "../world.js";
 export function blueprint_note(game: Game) {
     let shaker_entity: Entity;
     return [
-        collide(true, Layer.Collectable, Layer.Ground | Layer.Player, [0.3, 0.3, 0.3]),
-        trigger(Layer.Player, Action.CollectItem),
+        collide(
+            true,
+            Layer.Collectable,
+            Layer.Ground | Layer.Player | Layer.Obstacle,
+            [0.3, 0.3, 0.3]
+        ),
+        trigger(Layer.Player | Layer.Obstacle, Action.CollectItem),
         rigid_body(RigidKind.Dynamic, 0.1),
         audio_source(true),
         lifespan(15),
