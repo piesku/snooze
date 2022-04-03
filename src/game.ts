@@ -18,6 +18,7 @@ import {sys_collide} from "./systems/sys_collide.js";
 import {sys_control_always} from "./systems/sys_control_always.js";
 import {sys_control_jump} from "./systems/sys_control_jump.js";
 import {sys_control_keyboard} from "./systems/sys_control_keyboard.js";
+import {sys_cull} from "./systems/sys_cull.js";
 import {sys_debug} from "./systems/sys_debug.js";
 import {sys_draw} from "./systems/sys_draw.js";
 import {sys_lifespan} from "./systems/sys_lifespan.js";
@@ -86,6 +87,7 @@ export class Game extends Game3D {
         // Camera.
         sys_resize(this, delta);
         sys_camera(this, delta);
+        sys_cull(this, delta);
 
         // AI.
         sys_control_always(this, delta);

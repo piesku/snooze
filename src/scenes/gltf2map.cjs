@@ -30,10 +30,12 @@ let vec = (arr) =>
 let imports = new Set([
     'import {instantiate} from "../../common/game.js";',
     'import {collide} from "../components/com_collide.js";',
+    'import {cull} from "../components/com_cull.js";',
     'import {render_colored_shadows} from "../components/com_render.js";',
     'import {RigidKind, rigid_body} from "../components/com_rigid_body.js";',
     'import {transform} from "../components/com_transform.js";',
     'import {Game, Layer} from "../game.js";',
+    'import {Has} from "../world.js";',
 ]);
 
 function color(r, g, b) {
@@ -56,7 +58,7 @@ let create_instance = (name, translation, rotation, scale) => {
         ...blueprint_player(game),
         transform(${vec(translation)}, [0, 1, 0, 0], [0.05, 0.05, 0.05]),
     ]);`;
-        case "cube":
+        case "floor":
             return `
     instantiate(game, [
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
@@ -64,18 +66,23 @@ let create_instance = (name, translation, rotation, scale) => {
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
     ]);`;
+        case "cube":
+            return `
+    instantiate(game, [
+        transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
+        collide(false, Layer.Terrain, Layer.None),
+        rigid_body(RigidKind.Static),
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
+        cull(Has.Render),
+    ]);`;
         case "cylinder":
             return `
     instantiate(game, [
         transform(${vec(translation)}, ${vec(rotation)}, ${vec(scale)}),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
-            1,
-        ]),
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, ${color(221, 157, 105)}),
+        cull(Has.Render),
     ]);`;
         default:
             throw new Error("Unknown object: " + name);

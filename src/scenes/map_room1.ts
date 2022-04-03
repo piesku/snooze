@@ -1,9 +1,11 @@
 import {instantiate} from "../../common/game.js";
 import {collide} from "../components/com_collide.js";
+import {cull} from "../components/com_cull.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
 import {Game, Layer} from "../game.js";
+import {Has} from "../world.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
 
 export function map_room1(game: Game) {
@@ -12,9 +14,9 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            216.40115862877437 / 0xff,
-            152.71979298071014 / 0xff,
-            91.65846366836819 / 0xff,
+            226.62646581132924 / 0xff,
+            145.25775671274022 / 0xff,
+            98.86691049296672 / 0xff,
             1,
         ]),
     ]);
@@ -24,11 +26,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            216.54791233545018 / 0xff,
-            149.39419371684338 / 0xff,
-            109.58221706565406 / 0xff,
+            216.27764569735177 / 0xff,
+            164.83714605924766 / 0xff,
+            104.07544586774654 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -36,11 +39,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            234.0612258910468 / 0xff,
-            170.84692815523127 / 0xff,
-            99.29281116560226 / 0xff,
+            233.79042962728573 / 0xff,
+            154.14553218261744 / 0xff,
+            95.41397682431324 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -48,11 +52,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            226.25956899185402 / 0xff,
-            149.35904406823298 / 0xff,
-            95.79558004646809 / 0xff,
+            219.2067223426168 / 0xff,
+            151.7062386803476 / 0xff,
+            114.326444612209 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     // Player.
@@ -65,108 +70,117 @@ export function map_room1(game: Game) {
         transform([-2.5, 0.8, 4.4], undefined, [0.1, 0.2, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            233.48768020126457 / 0xff,
+            142.73688198802338 / 0xff,
+            94.39508480874281 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-3.1, 0.1, 4.4], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            207.02610290565715 / 0xff,
+            149.39101673919802 / 0xff,
+            90.0705893611105 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-4.5, 0.1, 4.4], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            209.3046787007104 / 0xff,
+            158.90019684775265 / 0xff,
+            115.59982301389691 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-4.5, 0.1, 2.8], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            229.70795071181212 / 0xff,
+            142.1602568671378 / 0xff,
+            109.52986632075928 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-3.1, 0.1, 2.8], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            207.38724806047017 / 0xff,
+            165.27318223065174 / 0xff,
+            92.55051557742689 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2.6, 0.1, 4.5], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            212.53992972215684 / 0xff,
+            148.58116496374274 / 0xff,
+            98.30445630333128 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2.2, 0.1, 4.5], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            207.97987233379928 / 0xff,
+            156.3263012422623 / 0xff,
+            93.13637652064496 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2.2, 0.1, 4.1], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            226.17053651547684 / 0xff,
+            150.3084891023513 / 0xff,
+            91.34806351933736 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2.6, 0.1, 4.1], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            232.2341484064215 / 0xff,
+            148.81483482681466 / 0xff,
+            100.22400748126843 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -174,59 +188,64 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            225.23283935967117 / 0xff,
-            164.7030908989504 / 0xff,
-            113.83419757867705 / 0xff,
+            224.95515608857048 / 0xff,
+            159.74149077388518 / 0xff,
+            116.50111495285759 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-4.5, 0.1, 0.4], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            227.04064146236976 / 0xff,
+            157.1825254429045 / 0xff,
+            102.74025810927192 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-4.5, 0.1, 0.2], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            216.3861917592639 / 0xff,
+            164.40657166311453 / 0xff,
+            95.31064078340009 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-3.1, 0.1, 0.2], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            213.95010621253897 / 0xff,
+            147.16907188951575 / 0xff,
+            112.82002214490126 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-3.1, 0.1, 0.4], undefined, [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            221.69659621462856 / 0xff,
+            156.5801349793491 / 0xff,
+            94.18651289495395 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -234,59 +253,64 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            227.2177172281363 / 0xff,
-            170.81702618038562 / 0xff,
-            107.60527195625703 / 0xff,
+            228.86900262756356 / 0xff,
+            148.49312678678342 / 0xff,
+            94.89891480907922 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([0.72, 0.12, 2.93], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            218.14769770926006 / 0xff,
+            164.21705539070715 / 0xff,
+            91.89768715832791 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([0.46, 0.12, 3.23], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            224.92828123825666 / 0xff,
+            146.29167955887925 / 0xff,
+            119.11896403943898 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([0.92, 0.12, 3.62], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            221.75904138318518 / 0xff,
+            154.23083655821713 / 0xff,
+            96.76538442840437 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([1.18, 0.12, 3.31], [0, -0.91, 0, 0.42], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            231.8915908971943 / 0xff,
+            150.035353299085 / 0xff,
+            92.54884083232797 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -294,11 +318,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            235.5979748568876 / 0xff,
-            154.72394188992763 / 0xff,
-            113.31812503245561 / 0xff,
+            226.93073209456773 / 0xff,
+            157.9892565640609 / 0xff,
+            107.54535443134165 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -306,11 +331,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            214.15427996206063 / 0xff,
-            146.3714057766531 / 0xff,
-            105.40471633438469 / 0xff,
+            206.70274267642347 / 0xff,
+            146.1604520163499 / 0xff,
+            111.1691149723218 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -318,11 +344,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            209.52126021229995 / 0xff,
-            142.07001143710622 / 0xff,
-            99.29762477649751 / 0xff,
+            214.71283006140735 / 0xff,
+            160.33789247819863 / 0xff,
+            110.78414584704842 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -330,59 +357,64 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            210.90450644044145 / 0xff,
-            169.88577036198834 / 0xff,
-            116.36311105700238 / 0xff,
+            231.26055447778316 / 0xff,
+            155.27862295699694 / 0xff,
+            93.79924723879547 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([2.34, 0.14, 0.13], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            209.84276310817796 / 0xff,
+            146.912294726208 / 0xff,
+            93.18544889882318 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([2.15, 0.14, -0.28], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            224.6803222117202 / 0xff,
+            143.83913188014708 / 0xff,
+            98.89307089905208 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([0.9, 0.14, 0.36], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            233.37688068964582 / 0xff,
+            148.21770951111674 / 0xff,
+            112.944188555918 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([1.05, 0.14, 0.68], [0, 0.84, 0, 0.54], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            218.45569447825093 / 0xff,
+            156.01233148856812 / 0xff,
+            103.38196791592907 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -390,11 +422,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            220.0325468043512 / 0xff,
-            170.63216419381368 / 0xff,
-            109.11299632340652 / 0xff,
+            229.27426348654686 / 0xff,
+            163.26394870481786 / 0xff,
+            110.19495918976415 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -402,59 +435,64 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            209.2760118238935 / 0xff,
-            145.7046372439806 / 0xff,
-            95.81003026085672 / 0xff,
+            221.16258333251602 / 0xff,
+            168.43145251181443 / 0xff,
+            94.05211422340523 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([3.75, 0.12, 2.44], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            224.17422393762843 / 0xff,
+            164.77416998277533 / 0xff,
+            95.65608648134514 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([4.09, 0.12, 2.64], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            224.54934366926557 / 0xff,
+            150.92589050524882 / 0xff,
+            118.91696385056301 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([4.39, 0.12, 2.12], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            211.3031334605731 / 0xff,
+            148.0242053621933 / 0xff,
+            100.88263843618266 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([4.05, 0.12, 1.92], [0, -0.26, 0, 0.97], [0.1, 0.24, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            230.4415429114464 / 0xff,
+            167.77589395995358 / 0xff,
+            92.14503442626375 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -462,11 +500,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            233.3538283545867 / 0xff,
-            160.15261933152237 / 0xff,
-            90.3112343862189 / 0xff,
+            226.9061723371245 / 0xff,
+            158.61748354186756 / 0xff,
+            117.28518548644564 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -474,11 +513,12 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            222.89537060105968 / 0xff,
-            144.73031540837178 / 0xff,
-            93.30191233153121 / 0xff,
+            230.97814186254007 / 0xff,
+            155.8986753032226 / 0xff,
+            107.69683673144151 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
@@ -486,70 +526,76 @@ export function map_room1(game: Game) {
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
-            211.15503452079636 / 0xff,
-            156.65790853046997 / 0xff,
-            105.83777124730888 / 0xff,
+            208.59742963639312 / 0xff,
+            157.83135613508355 / 0xff,
+            95.74819431054637 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2, 0.32, -2.5], undefined, [0.1, 0.58, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            227.8711866724623 / 0xff,
+            160.03703333630705 / 0xff,
+            102.5268290798797 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-1.8, 0.64, -2.7], undefined, [1.44, 0.1, 1.44]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            222.60563645980002 / 0xff,
+            161.402771928834 / 0xff,
+            103.12917474878878 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-1.6, 0.34, -2.5], undefined, [0.1, 0.58, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            207.16378138481082 / 0xff,
+            154.09318680928186 / 0xff,
+            110.71820183307588 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-1.6, 0.34, -2.9], undefined, [0.1, 0.58, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            220.7597707416725 / 0xff,
+            146.85645374686317 / 0xff,
+            97.52370744051026 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 
     instantiate(game, [
         transform([-2, 0.34, -2.9], undefined, [0.1, 0.58, 0.1]),
         collide(false, Layer.Terrain, Layer.None),
         rigid_body(RigidKind.Static),
-        render_colored_shadows(game.MaterialColoredShadows, game.MeshCylinder, [
-            221 / 0xff,
-            157 / 0xff,
-            105 / 0xff,
+        render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
+            209.42412038445823 / 0xff,
+            163.59585915406558 / 0xff,
+            93.56446527553005 / 0xff,
             1,
         ]),
+        cull(Has.Render),
     ]);
 }

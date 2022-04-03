@@ -13,12 +13,12 @@ export function scene_room(game: Game) {
 
     map_room1(game);
 
+    // Camera.
+    instantiate(game, [...blueprint_camera_follow(game), transform([0, 10, 0])]);
+
     // The shadow source.
     instantiate(game, [
         ...blueprint_sun(game),
         transform(undefined, from_euler([0, 0, 0, 0], -45, 45, 0)),
     ]);
-
-    // Camera.
-    instantiate(game, [...blueprint_camera_follow(game), transform([0, 10, 0])]);
 }
