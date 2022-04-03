@@ -10972,7 +10972,7 @@
     return [
       mimic(first_named(game2.World, "title camera anchor")),
       children([
-        transform([0, 1, -6], [0, 1, 0, 0]),
+        transform([0, 1, -8], [0, 1, 0, 0]),
         camera_canvas(perspective(1, 0.1, 1e3), [170 / 255, 199 / 255, 172 / 255, 1])
       ])
     ];
