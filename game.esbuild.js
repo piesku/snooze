@@ -32992,6 +32992,8 @@
     return html`
         <div
             style="
+                position: absolute;
+                bottom: 0;
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
                 text-transform: uppercase;
@@ -33004,7 +33006,7 @@
                     font-weight: 800;
                 "
             >
-                Sleepiness: ${game2.Sleepiness}
+                ${game2.Sleepiness > 2 ? "The human is still asleep." : game2.Sleepiness > 1 ? "The human is waking up." : "The human is almost awake."}
             </div>
         </div>
     `;
