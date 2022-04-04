@@ -32749,7 +32749,7 @@ function Title(game2) {
 return html`
 <div
 style="
-padding: 1vmin;
+padding: 1vh 1vw;
 font-family: Helvetica, Arial, sans-serif;
 font-size: 15vmin;
 font-weight: 800;
@@ -32781,9 +32781,7 @@ function Overlay(game2) {
 return html`
 <div
 style="
-position: absolute;
-bottom: 0;
-padding: 1vmin;
+padding: 1vh 1vw;
 font-family: Helvetica, Arial, sans-serif;
 font-size: 10vmin;
 font-weight: 800;
@@ -32799,7 +32797,7 @@ function Win(game2) {
 return html`
 <div
 style="
-padding: 1vmin;
+padding: 1vh 1vw;
 font-family: Helvetica, Arial, sans-serif;
 font-size: 15vmin;
 font-weight: 800;
@@ -32831,7 +32829,7 @@ function Lose(game2) {
 return html`
 <div
 style="
-padding: 1vmin;
+padding: 1vh 1vw;
 font-family: Helvetica, Arial, sans-serif;
 font-size: 15vmin;
 font-weight: 800;
