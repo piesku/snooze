@@ -45,6 +45,7 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
 
                 if (game.Sleepiness <= 0) {
                     game.PlayState = "win";
+                    other_collide.Layers &= ~Layer.Player;
                 }
             }
             destroy_all(game.World, item_entity);
@@ -55,6 +56,7 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
             let other_collide = game.World.Collide[other_entity];
             if (other_collide.Layers & Layer.Player) {
                 game.PlayState = "lose";
+                other_collide.Layers &= ~Layer.Player;
             } else {
                 let hand_collide = game.World.Collide[hand_entity];
                 hand_collide.Mask &= ~Layer.Player;
