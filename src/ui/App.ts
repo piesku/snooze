@@ -21,7 +21,7 @@ export function Title(game: Game) {
     return html`
         <div
             style="
-                padding: 1vmin;
+                padding: 1vh 1vw;
                 font-family: Helvetica, Arial, sans-serif;
                 font-size: 15vmin;
                 font-weight: 800;
@@ -54,9 +54,7 @@ export function Overlay(game: Game) {
     return html`
         <div
             style="
-                position: absolute;
-                bottom: 0;
-                padding: 1vmin;
+                padding: 1vh 1vw;
                 font-family: Helvetica, Arial, sans-serif;
                 font-size: 10vmin;
                 font-weight: 800;
@@ -77,7 +75,7 @@ export function Win(game: Game) {
     return html`
         <div
             style="
-                padding: 1vmin;
+                padding: 1vh 1vw;
                 font-family: Helvetica, Arial, sans-serif;
                 font-size: 15vmin;
                 font-weight: 800;
@@ -110,7 +108,7 @@ export function Lose(game: Game) {
     return html`
         <div
             style="
-                padding: 1vmin;
+                padding: 1vh 1vw;
                 font-family: Helvetica, Arial, sans-serif;
                 font-size: 15vmin;
                 font-weight: 800;
