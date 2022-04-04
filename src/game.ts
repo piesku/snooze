@@ -108,7 +108,7 @@ export class Game extends Game3D {
         sys_shake(this, delta);
         sys_toggle(this, delta);
         sys_spawn(this, delta);
-        sys_particles(this, delta);
+        false && sys_particles(this, delta);
         sys_transform(this, delta);
 
         if (false) {
