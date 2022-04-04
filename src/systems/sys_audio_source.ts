@@ -31,6 +31,9 @@ function update(game: Game, entity: Entity, delta: number) {
             // before the clip actually ends, if Exit < duration. That's OK, as
             // we don't attempt to stop the current audio anyways.
             // TODO Schedule notes from Current progressively rather than all at once.
+            if (audio_source.Current.Next) {
+                audio_source.Trigger = audio_source.Current.Next();
+            }
             audio_source.Current = undefined;
         } else if (audio_source.Panner) {
             update_panner(audio_source.Panner, transform);

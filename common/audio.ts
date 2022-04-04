@@ -11,6 +11,7 @@ export interface AudioBufferClip {
     Kind: AudioClipKind.Buffer;
     Buffer: AudioBuffer;
     Exit: number;
+    Next?: () => AudioClip;
 }
 
 export interface AudioSynthClip {
@@ -21,6 +22,7 @@ export interface AudioSynthClip {
     Exit: number;
     /** Beats per minute (default 120). */
     BPM?: number;
+    Next?: () => AudioClip;
 }
 
 export interface AudioTrack {
