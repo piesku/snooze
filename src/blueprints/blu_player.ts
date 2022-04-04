@@ -2,7 +2,6 @@ import {ease_in_out_quad, ease_in_quad, ease_out_quad} from "../../common/easing
 import {from_euler} from "../../common/quat.js";
 import {Entity} from "../../common/world.js";
 import {animate, AnimationFlag} from "../components/com_animate.js";
-import {audio_listener} from "../components/com_audio_listener.js";
 import {audio_source} from "../components/com_audio_source.js";
 import {callback} from "../components/com_callback.js";
 import {children} from "../components/com_children.js";
@@ -31,7 +30,6 @@ export function blueprint_player(game: Game) {
         collide(true, Layer.Player, Layer.Ground | Layer.Obstacle, [2.8, 2.6, 2]),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
-        audio_listener(),
         children(
             [
                 task_when(

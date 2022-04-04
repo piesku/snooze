@@ -1,6 +1,7 @@
 import {Entity} from "../../common/world.js";
 import {query_down} from "../components/com_children.js";
 import {Game} from "../game.js";
+import {snd_jump} from "../sounds/snd_jump.js";
 import {Has} from "../world.js";
 
 const QUERY = Has.ControlPlayer | Has.RigidBody;
@@ -29,6 +30,9 @@ function update(game: Game, entity: Entity) {
                 for (let ent of query_down(game.World, entity, Has.Animate)) {
                     game.World.Animate[ent].Trigger = "jump";
                 }
+
+                let audio = game.World.AudioSource[entity];
+                audio.Trigger = snd_jump;
             }
         }
     }
