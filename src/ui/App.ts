@@ -59,6 +59,8 @@ export function Overlay(game: Game) {
     return html`
         <div
             style="
+                position: absolute;
+                bottom: 0;
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
                 text-transform: uppercase;
@@ -71,7 +73,11 @@ export function Overlay(game: Game) {
                     font-weight: 800;
                 "
             >
-                Sleepiness: ${game.Sleepiness}
+                ${game.Sleepiness > 2
+                    ? "The human is still asleep."
+                    : game.Sleepiness > 1
+                    ? "The human is waking up."
+                    : "The human is almost awake."}
             </div>
         </div>
     `;
