@@ -12,7 +12,7 @@ export function blueprint_spawner(game: Game) {
     return [
         children([
             transform(),
-            shake(5),
+            shake(4),
             spawn(blueprint_hand, 2),
             disable(Has.Spawn),
             task_when(

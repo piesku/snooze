@@ -9,7 +9,7 @@ export function blueprint_sun(game: Game) {
     return [
         children([
             transform([0, 0, 10]),
-            camera_target(game.Targets.Sun, orthographic(8, 3, 15)),
+            camera_target(game.Targets.Sun, orthographic(7, 3, 15)),
             light_directional([1, 1, 1], 0.3),
         ]),
     ];

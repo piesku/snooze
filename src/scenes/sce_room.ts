@@ -28,7 +28,7 @@ export function scene_room(game: Game) {
     // The shadow source.
     instantiate(game, [
         ...blueprint_sun(game),
-        transform(undefined, from_euler([0, 0, 0, 0], -45, 45, 0)),
+        transform(undefined, from_euler([0, 0, 0, 0], -75, 30, 0)),
     ]);
 
     // Note spawner.

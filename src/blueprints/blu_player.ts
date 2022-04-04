@@ -196,7 +196,7 @@ export function blueprint_player(game: Game) {
                 named("lose camera anchor"),
                 transform([0, 30, 50], from_euler([0, 0, 0, 1], 30, -155, 0)),
             ],
-            [named("hand spawner anchor"), transform([0, 50, 30]), ...blueprint_spawner(game)]
+            [named("hand spawner anchor"), transform([0, 100, 30]), ...blueprint_spawner(game)]
         ),
     ];
 }

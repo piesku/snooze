@@ -19,8 +19,8 @@ export function blueprint_camera_follow(game: Game) {
         audio_source(false),
         children(
             [
-                transform([0, 0.1, -1], [0, 1, 0, 0]),
-                camera_canvas(perspective(1, 0.1, 1000), [170 / 255, 199 / 255, 172 / 255, 1]),
+                transform([0, 0.1, -1.2], [0, 1, 0, 0]),
+                camera_canvas(perspective(1, 0.1, 100), [170 / 255, 199 / 255, 172 / 255, 1]),
             ],
             [
                 task_when(
