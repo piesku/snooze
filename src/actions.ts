@@ -2,6 +2,7 @@ import {Entity} from "../common/world.js";
 import {destroy_all} from "./components/com_children.js";
 import {Game, Layer} from "./game.js";
 import {scene_room} from "./scenes/sce_room.js";
+import {Has} from "./world.js";
 
 export const enum Action {
     ToggleFullscreen,
@@ -33,6 +34,10 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
         }
         case Action.CollectItem: {
             let [item_entity, other_entity] = payload as [Entity, Entity];
+            if (game.World.Signature[item_entity] === Has.None) {
+                // The item has already been destroyed this frame.
+                break;
+            }
             let other_collide = game.World.Collide[other_entity];
             if (other_collide.Layers & Layer.Player) {
                 game.Sleepiness--;
