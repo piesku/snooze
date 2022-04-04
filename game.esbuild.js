@@ -228,9 +228,9 @@
       for (let name in this.InputDelta) {
         this.InputDelta[name] = 0;
       }
-      let update19 = performance.now() - this.Now;
+      let update16 = performance.now() - this.Now;
       if (update_span) {
-        update_span.textContent = update19.toFixed(1);
+        update_span.textContent = update16.toFixed(1);
       }
       if (delta_span) {
         delta_span.textContent = (delta * 1e3).toFixed(1);
@@ -31479,18 +31479,6 @@
     out[15] = 1;
     return out;
   }
-  function get_up(out, mat) {
-    out[0] = mat[4];
-    out[1] = mat[5];
-    out[2] = mat[6];
-    return normalize(out, out);
-  }
-  function get_forward(out, mat) {
-    out[0] = mat[8];
-    out[1] = mat[9];
-    out[2] = mat[10];
-    return normalize(out, out);
-  }
   function get_translation(out, mat) {
     out[0] = mat[12];
     out[1] = mat[13];
@@ -31564,214 +31552,22 @@
 
   // ../src/systems/sys_audio_listener.ts
   var QUERY2 = 2 /* AudioListener */ | 8388608 /* Transform */;
-  function sys_audio_listener(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY2) === QUERY2) {
-        update2(game2, i);
-      }
-    }
-  }
-  var position = [0, 0, 0];
-  var forward = [0, 0, 0];
-  var up = [0, 0, 0];
-  function update2(game2, entity) {
-    let transform2 = game2.World.Transform[entity];
-    get_translation(position, transform2.World);
-    get_forward(forward, transform2.World);
-    get_up(up, transform2.World);
-    let listener = game2.Audio.listener;
-    if (listener.positionX) {
-      listener.positionX.value = position[0];
-      listener.positionY.value = position[1];
-      listener.positionZ.value = position[2];
-      listener.forwardX.value = forward[0];
-      listener.forwardY.value = forward[1];
-      listener.forwardZ.value = forward[2];
-      listener.upX.value = up[0];
-      listener.upY.value = up[1];
-      listener.upZ.value = up[2];
-    } else {
-      listener.setPosition(...position);
-      listener.setOrientation(...forward, ...up);
-    }
-  }
 
-  // ../common/audio.ts
-  function play_note(audio, panner, instr, note, offset) {
-    let time = audio.currentTime + offset;
-    let total_duration = 0;
-    if (panner) {
-      panner.connect(audio.destination);
-    }
-    let master = audio.createGain();
-    master.gain.value = (instr[0 /* MasterGainAmount */] / 9) ** 3;
-    let lfa, lfo;
-    if (instr[5 /* LFOType */]) {
-      lfo = audio.createOscillator();
-      lfo.type = instr[5 /* LFOType */];
-      lfo.frequency.value = (instr[7 /* LFOFreq */] / 3) ** 3;
-      lfa = audio.createGain();
-      lfa.gain.value = (instr[6 /* LFOAmount */] + 3) ** 3;
-      lfo.connect(lfa);
-    }
-    if (instr[1 /* FilterType */]) {
-      let filter = audio.createBiquadFilter();
-      filter.type = instr[1 /* FilterType */];
-      filter.frequency.value = 2 ** instr[2 /* FilterFreq */];
-      filter.Q.value = instr[3 /* FilterQ */] ** 1.5;
-      if (lfa && instr[4 /* FilterDetuneLFO */]) {
-        lfa.connect(filter.detune);
-      }
-      master.connect(filter);
-      if (panner) {
-        filter.connect(panner);
-      } else {
-        filter.connect(audio.destination);
-      }
-    } else if (panner) {
-      master.connect(panner);
-    } else {
-      master.connect(audio.destination);
-    }
-    for (let source of instr[8 /* Sources */]) {
-      let amp = audio.createGain();
-      amp.connect(master);
-      let gain_amount = (source[1 /* GainAmount */] / 9) ** 3;
-      let gain_attack = (source[2 /* GainAttack */] / 9) ** 3;
-      let gain_sustain = (source[3 /* GainSustain */] / 9) ** 3;
-      let gain_release = (source[4 /* GainRelease */] / 6) ** 3;
-      let gain_duration = gain_attack + gain_sustain + gain_release;
-      amp.gain.setValueAtTime(0, time);
-      amp.gain.linearRampToValueAtTime(gain_amount, time + gain_attack);
-      amp.gain.setValueAtTime(gain_amount, time + gain_attack + gain_sustain);
-      amp.gain.exponentialRampToValueAtTime(1e-5, time + gain_duration);
-      if (source[0]) {
-        let hfo = audio.createOscillator();
-        hfo.type = source[0 /* SourceType */];
-        hfo.connect(amp);
-        hfo.detune.value = 3 * (source[5 /* DetuneAmount */] - 7.5) ** 3;
-        if (lfa && source[6 /* DetuneLFO */]) {
-          lfa.connect(hfo.detune);
-        }
-        let freq = 440 * 2 ** ((note - 69) / 12);
-        if (source[7 /* FreqEnabled */]) {
-          let freq_attack = (source[8 /* FreqAttack */] / 9) ** 3;
-          let freq_sustain = (source[9 /* FreqSustain */] / 9) ** 3;
-          let freq_release = (source[10 /* FreqRelease */] / 6) ** 3;
-          hfo.frequency.linearRampToValueAtTime(0, time);
-          hfo.frequency.linearRampToValueAtTime(freq, time + freq_attack);
-          hfo.frequency.setValueAtTime(freq, time + freq_attack + freq_sustain);
-          hfo.frequency.exponentialRampToValueAtTime(1e-5, time + freq_attack + freq_sustain + freq_release);
-        } else {
-          hfo.frequency.setValueAtTime(freq, time);
-        }
-        hfo.start(time);
-        hfo.stop(time + gain_duration);
-      } else {
-        let noise = audio.createBufferSource();
-        noise.buffer = lazy_noise_buffer(audio);
-        noise.loop = true;
-        noise.connect(amp);
-        noise.start(time);
-        noise.stop(time + gain_duration);
-      }
-      if (gain_duration > total_duration) {
-        total_duration = gain_duration;
-      }
-    }
-    if (lfo) {
-      lfo.start(time);
-      lfo.stop(time + total_duration);
-    }
+  // ../common/random.ts
+  var seed = 1;
+  function rand() {
+    seed = seed * 16807 % 2147483647;
+    return (seed - 1) / 2147483646;
   }
-  var noise_buffer;
-  function lazy_noise_buffer(audio) {
-    if (!noise_buffer) {
-      noise_buffer = audio.createBuffer(1, audio.sampleRate * 2, audio.sampleRate);
-      let channel = noise_buffer.getChannelData(0);
-      for (let i = 0; i < channel.length; i++) {
-        channel[i] = Math.random() * 2 - 1;
-      }
-    }
-    return noise_buffer;
+  function integer(min = 0, max = 1) {
+    return ~~(rand() * (max - min + 1) + min);
   }
-  function play_synth_clip(audio, panner, clip) {
-    let spb = 60 / (clip.BPM || 120);
-    let interval = spb / 4;
-    for (let track of clip.Tracks) {
-      for (let i = 0; i < track.Notes.length; i++) {
-        if (track.Notes[i]) {
-          play_note(audio, panner, track.Instrument, track.Notes[i], i * interval);
-        }
-      }
-    }
-  }
-  function play_buffer_clip(audio, panner, clip) {
-    let source = audio.createBufferSource();
-    source.buffer = clip.Buffer;
-    if (panner) {
-      source.connect(panner);
-      panner.connect(audio.destination);
-    } else {
-      source.connect(audio.destination);
-    }
-    source.start();
+  function element(arr) {
+    return arr[integer(0, arr.length - 1)];
   }
 
   // ../src/systems/sys_audio_source.ts
   var QUERY3 = 4 /* AudioSource */ | 8388608 /* Transform */;
-  function sys_audio_source(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY3) === QUERY3) {
-        update3(game2, i, delta);
-      }
-    }
-  }
-  function update3(game2, entity, delta) {
-    let audio_source2 = game2.World.AudioSource[entity];
-    let transform2 = game2.World.Transform[entity];
-    if (audio_source2.Current) {
-      audio_source2.Time += delta;
-      if (audio_source2.Time > audio_source2.Current.Exit) {
-        audio_source2.Current = void 0;
-      } else if (audio_source2.Panner) {
-        update_panner(audio_source2.Panner, transform2);
-      }
-    }
-    if (audio_source2.Trigger && !audio_source2.Current) {
-      switch (audio_source2.Trigger.Kind) {
-        case 0 /* Buffer */:
-          play_buffer_clip(game2.Audio, audio_source2.Panner, audio_source2.Trigger);
-          break;
-        case 1 /* Synth */:
-          play_synth_clip(game2.Audio, audio_source2.Panner, audio_source2.Trigger);
-          break;
-      }
-      audio_source2.Current = audio_source2.Trigger;
-      audio_source2.Time = 0;
-      if (audio_source2.Panner) {
-        update_panner(audio_source2.Panner, transform2);
-      }
-    }
-    audio_source2.Trigger = audio_source2.Idle;
-  }
-  var position2 = [0, 0, 0];
-  var forward2 = [0, 0, 0];
-  function update_panner(panner, transform2) {
-    get_translation(position2, transform2.World);
-    get_forward(forward2, transform2.World);
-    if (panner.positionX) {
-      panner.positionX.value = position2[0];
-      panner.positionY.value = position2[1];
-      panner.positionZ.value = position2[2];
-      panner.orientationX.value = forward2[0];
-      panner.orientationY.value = forward2[1];
-      panner.orientationZ.value = forward2[2];
-    } else {
-      panner.setPosition(...position2);
-      panner.setOrientation(...forward2);
-    }
-  }
 
   // ../src/components/com_camera.ts
   function camera_canvas(projection, clear_color = [0.9, 0.9, 0.9, 1], clear_mask = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT) {
@@ -31956,11 +31752,11 @@
   function sys_control_always(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY6) === QUERY6) {
-        update4(game2, i);
+        update2(game2, i);
       }
     }
   }
-  function update4(game2, entity) {
+  function update2(game2, entity) {
     let control = game2.World.ControlAlways[entity];
     let move2 = game2.World.Move[entity];
     if (control.Direction) {
@@ -31977,16 +31773,41 @@
     }
   }
 
+  // ../src/sounds/snd_jump.ts
+  var snd_jump = {
+    Kind: 1 /* Synth */,
+    Tracks: [
+      {
+        Instrument: [
+          8,
+          false,
+          7,
+          8,
+          false,
+          false,
+          8,
+          8,
+          [
+            ["triangle", 8, 8, 8, 6, 8, false, true, 2, 3, 7],
+            ["square", 3, 1, 2, 2, 8, false, false, 0, 0, 0]
+          ]
+        ],
+        Notes: [72]
+      }
+    ],
+    Exit: 0.4
+  };
+
   // ../src/systems/sys_control_jump.ts
   var QUERY7 = 128 /* ControlPlayer */ | 262144 /* RigidBody */;
   function sys_control_jump(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY7) === QUERY7) {
-        update5(game2, i);
+        update3(game2, i);
       }
     }
   }
-  function update5(game2, entity) {
+  function update3(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (control.Jump) {
@@ -31996,6 +31817,8 @@
           for (let ent of query_down(game2.World, entity, 1 /* Animate */)) {
             game2.World.Animate[ent].Trigger = "jump";
           }
+          let audio = game2.World.AudioSource[entity];
+          audio.Trigger = snd_jump;
         }
       }
     }
@@ -32006,11 +31829,11 @@
   function sys_control_keyboard(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY8) === QUERY8) {
-        update6(game2, i);
+        update4(game2, i);
       }
     }
   }
-  function update6(game2, entity) {
+  function update4(game2, entity) {
     let control = game2.World.ControlPlayer[entity];
     if (control.Yaw) {
       let move2 = game2.World.Move[entity];
@@ -32047,11 +31870,11 @@
     }
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY9) === QUERY9) {
-        update7(game2, i);
+        update5(game2, i);
       }
     }
   }
-  function update7(game2, entity) {
+  function update5(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let control = game2.World.ControlPlayer[entity];
     let move2 = game2.World.Move[entity];
@@ -32080,17 +31903,17 @@
     let pv = game2.World.Camera[camera_entity].Pv;
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY10) === QUERY10) {
-        update8(game2, i, pv);
+        update6(game2, i, pv);
       }
     }
   }
-  var position3 = [0, 0, 0];
-  function update8(game2, entity, pv) {
+  var position = [0, 0, 0];
+  function update6(game2, entity, pv) {
     let cull2 = game2.World.Cull[entity];
     let transform2 = game2.World.Transform[entity];
-    get_translation(position3, transform2.World);
-    transform_position(position3, position3, pv);
-    if (Math.abs(position3[2]) > 1) {
+    get_translation(position, transform2.World);
+    transform_position(position, position, pv);
+    if (Math.abs(position[2]) > 1) {
       game2.World.Signature[entity] &= ~cull2.Mask;
     } else {
       game2.World.Signature[entity] |= cull2.Mask;
@@ -32148,11 +31971,11 @@
   function sys_lifespan(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY12) == QUERY12) {
-        update9(game2, i, delta);
+        update7(game2, i, delta);
       }
     }
   }
-  function update9(game2, entity, delta) {
+  function update7(game2, entity, delta) {
     let lifespan2 = game2.World.Lifespan[entity];
     lifespan2.Remaining -= delta;
     if (lifespan2.Remaining < 0) {
@@ -32186,11 +32009,11 @@
   function sys_move(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY14) === QUERY14) {
-        update10(game2, i, delta);
+        update8(game2, i, delta);
       }
     }
   }
-  function update10(game2, entity, delta) {
+  function update8(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let move2 = game2.World.Move[entity];
     if (move2.Direction[0] !== 0 || move2.Direction[1] !== 0 || move2.Direction[2] !== 0) {
@@ -32224,35 +32047,6 @@
 
   // ../src/systems/sys_particles.ts
   var QUERY15 = 8388608 /* Transform */ | 2048 /* EmitParticles */;
-  function sys_particles(game2, delta) {
-    for (let i = 0; i < game2.World.Signature.length; i++) {
-      if ((game2.World.Signature[i] & QUERY15) == QUERY15) {
-        update11(game2, i, delta);
-      }
-    }
-  }
-  var origin = [0, 0, 0];
-  var forward3 = [0, 0, 0];
-  function update11(game2, entity, delta) {
-    let emitter = game2.World.EmitParticles[entity];
-    let transform2 = game2.World.Transform[entity];
-    emitter.SinceLast += delta;
-    if (emitter.SinceLast > emitter.Frequency) {
-      emitter.SinceLast = 0;
-      get_translation(origin, transform2.World);
-      get_forward(forward3, transform2.World);
-      emitter.Instances.push(...origin, 0);
-      emitter.Instances.push(...forward3, Math.random());
-    }
-    for (let i = 0; i < emitter.Instances.length; ) {
-      emitter.Instances[i + 3] += delta;
-      if (emitter.Instances[i + 3] > emitter.Lifespan) {
-        emitter.Instances.splice(i, FLOATS_PER_PARTICLE);
-      } else {
-        i += FLOATS_PER_PARTICLE;
-      }
-    }
-  }
 
   // ../src/components/com_rigid_body.ts
   function rigid_body(kind, bounciness = 0.5) {
@@ -32277,11 +32071,11 @@
   function sys_physics_integrate(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY16) === QUERY16) {
-        update12(game2, i, delta);
+        update9(game2, i, delta);
       }
     }
   }
-  function update12(game2, entity, delta) {
+  function update9(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     if (rigid_body2.Kind === 1 /* Dynamic */) {
@@ -32302,13 +32096,13 @@
   function sys_physics_kinematic(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY17) === QUERY17) {
-        update13(game2, i, delta);
+        update10(game2, i, delta);
       }
     }
   }
   var current_position = [0, 0, 0];
   var movement_delta = [0, 0, 0];
-  function update13(game2, entity, delta) {
+  function update10(game2, entity, delta) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     get_translation(current_position, transform2.World);
@@ -32324,12 +32118,12 @@
   function sys_physics_resolve(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY18) === QUERY18) {
-        update14(game2, i);
+        update11(game2, i);
       }
     }
   }
   var a = [0, 0, 0];
-  function update14(game2, entity) {
+  function update11(game2, entity) {
     let transform2 = game2.World.Transform[entity];
     let rigid_body2 = game2.World.RigidBody[entity];
     let collide2 = game2.World.Collide[rigid_body2.ColliderId];
@@ -32806,11 +32600,11 @@
   function sys_shake(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY23) == QUERY23) {
-        update15(game2, i);
+        update12(game2, i);
       }
     }
   }
-  function update15(game2, entity) {
+  function update12(game2, entity) {
     let shake2 = game2.World.Shake[entity];
     let transform2 = game2.World.Transform[entity];
     transform2.Translation = [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5];
@@ -32823,11 +32617,11 @@
   function sys_spawn(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY24) == QUERY24) {
-        update16(game2, i, delta);
+        update13(game2, i, delta);
       }
     }
   }
-  function update16(game2, entity, delta) {
+  function update13(game2, entity, delta) {
     let spawn2 = game2.World.Spawn[entity];
     spawn2.SinceLast += delta;
     if (spawn2.SinceLast > spawn2.Interval) {
@@ -32846,11 +32640,11 @@
   function sys_toggle(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY25) == QUERY25) {
-        update17(game2, i, delta);
+        update14(game2, i, delta);
       }
     }
   }
-  function update17(game2, entity, delta) {
+  function update14(game2, entity, delta) {
     let toggle2 = game2.World.Toggle[entity];
     toggle2.SinceLast += delta;
     if (toggle2.SinceLast > toggle2.Frequency) {
@@ -32906,11 +32700,11 @@
   function sys_trigger(game2, delta) {
     for (let i = 0; i < game2.World.Signature.length; i++) {
       if ((game2.World.Signature[i] & QUERY27) === QUERY27) {
-        update18(game2, i);
+        update15(game2, i);
       }
     }
   }
-  function update18(game2, entity) {
+  function update15(game2, entity) {
     let collide2 = game2.World.Collide[entity];
     let trigger2 = game2.World.Trigger[entity];
     for (let collision of collide2.Collisions) {
@@ -33145,19 +32939,32 @@
       sys_shake(this, delta);
       sys_toggle(this, delta);
       sys_spawn(this, delta);
-      sys_particles(this, delta);
+      false;
       sys_transform(this, delta);
       if (false) {
         sys_debug(this, delta);
       }
-      sys_audio_listener(this, delta);
-      sys_audio_source(this, delta);
+      false;
+      false;
       sys_render_depth(this, delta);
       sys_render_forward(this, delta);
       false;
       sys_ui(this, delta);
     }
   };
+
+  // ../src/components/com_audio_source.ts
+  function audio_source(spatial, idle) {
+    return (game2, entity) => {
+      let panner = spatial ? game2.Audio.createPanner() : void 0;
+      game2.World.Signature[entity] |= 4 /* AudioSource */;
+      game2.World.AudioSource[entity] = {
+        Panner: panner,
+        Idle: idle,
+        Time: 0
+      };
+    };
+  }
 
   // ../src/components/com_callback.ts
   function callback(fn) {
@@ -33193,42 +33000,65 @@
     throw `No entity named ${name}.`;
   }
 
+  // ../src/sounds/snd_piano.ts
+  function snd_piano() {
+    return {
+      Kind: 1 /* Synth */,
+      Tracks: [
+        {
+          Instrument: [
+            8,
+            false,
+            8,
+            8,
+            false,
+            false,
+            8,
+            8,
+            [
+              ["sine", 8, 4, 4, 5, 8, false, false, 8, 8, 8],
+              [false, 2, 2, 2, 4],
+              ["sine", 5, 0, 2, 3, 11, false, false, 8, 8, 8]
+            ]
+          ],
+          Notes: [element([53, 55, 57, 59, 60])]
+        }
+      ],
+      Exit: element([0.2, 0.2, 0.2, 0.4]),
+      Next: snd_piano
+    };
+  }
+
   // ../src/blueprints/blu_camera_follow.ts
   function blueprint_camera_follow(game2) {
     let camera;
     return [
       callback((game3, entity) => camera = entity),
       mimic(first_named(game2.World, "title camera anchor")),
+      audio_source(false),
       children([
         transform([0, 0.1, -1], [0, 1, 0, 0]),
         camera_canvas(perspective(1, 0.1, 1e3), [170 / 255, 199 / 255, 172 / 255, 1])
       ], [
         task_when(() => game2.PlayState === "playing", (entity) => {
           mimic(first_named(game2.World, "player camera anchor"))(game2, camera);
+          let audio = game2.World.AudioSource[camera];
+          audio.Trigger = snd_piano();
         })
       ], [
         task_when(() => game2.PlayState === "win", (entity) => {
           mimic(first_named(game2.World, "title camera anchor"))(game2, camera);
+          let audio = game2.World.AudioSource[camera];
+          audio.Trigger = void 0;
         })
       ], [
         task_when(() => game2.PlayState === "lose", (entity) => {
           mimic(first_named(game2.World, "lose camera anchor"))(game2, camera);
+          let audio = game2.World.AudioSource[camera];
+          audio.Trigger = void 0;
         })
       ])
     ];
-  }
-
-  // ../src/components/com_audio_source.ts
-  function audio_source(spatial, idle) {
-    return (game2, entity) => {
-      let panner = spatial ? game2.Audio.createPanner() : void 0;
-      game2.World.Signature[entity] |= 4 /* AudioSource */;
-      game2.World.AudioSource[entity] = {
-        Panner: panner,
-        Idle: idle,
-        Time: 0
-      };
-    };
   }
 
   // ../src/components/com_collide.ts
@@ -33418,13 +33248,6 @@
     return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2;
   }
 
-  // ../src/components/com_audio_listener.ts
-  function audio_listener() {
-    return (game2, entity) => {
-      game2.World.Signature[entity] |= 2 /* AudioListener */;
-    };
-  }
-
   // ../src/components/com_control_player.ts
   function control_player(jump, yaw, pitch, min_pitch = 0, max_pitch = 0) {
     return (game2, entity) => {
@@ -33485,7 +33308,6 @@
       collide(true, 1 /* Player */, 2 /* Ground */ | 4 /* Obstacle */, [2.8, 2.6, 2]),
       rigid_body(1 /* Dynamic */),
       audio_source(false),
-      audio_listener(),
       children([
         task_when(() => game2.PlayState === "playing", (entity) => {
           game2.World.Signature[player] |= 64 /* ControlAlways */;
