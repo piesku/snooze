@@ -116,8 +116,8 @@ export class Game extends Game3D {
         }
 
         // Rendering.
-        sys_audio_listener(this, delta);
-        sys_audio_source(this, delta);
+        false && sys_audio_listener(this, delta);
+        false && sys_audio_source(this, delta);
         sys_render_depth(this, delta);
         sys_render_forward(this, delta);
         false && sys_draw(this, delta);
