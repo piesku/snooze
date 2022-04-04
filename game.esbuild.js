@@ -32751,34 +32751,29 @@
             style="
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
+                font-size: 15vmin;
+                font-weight: 800;
                 text-transform: uppercase;
                 color: white;
             "
         >
-            <div
+            You are the snooze button.
+            <button
+                onclick="$(${2 /* GameStart */})"
                 style="
-                    font-size: 15vmin;
+                    font-size: 5vmin;
                     font-weight: 800;
+                    text-transform: uppercase;
+                    color: white;
+                    background: none;
+                    padding: 1vmin 3vmin;
+                    vertical-align: 4vmin;
+                    border: 2vmin solid white;
+                    border-radius: 50px;
                 "
             >
-                You are the snooze button.
-                <button
-                    onclick="$(${2 /* GameStart */})"
-                    style="
-                        font-size: 5vmin;
-                        font-weight: 800;
-                        text-transform: uppercase;
-                        color: white;
-                        background: none;
-                        padding: 1vmin 3vmin;
-                        vertical-align: 4vmin;
-                        border: 2vmin solid white;
-                        border-radius: 50px;
-                    "
-                >
-                    Let's go
-                </button>
-            </div>
+                Let's go
+            </button>
         </div>
     `;
   }
@@ -32790,18 +32785,13 @@
                 bottom: 0;
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
+                font-size: 10vmin;
+                font-weight: 800;
                 text-transform: uppercase;
                 color: white;
             "
         >
-            <div
-                style="
-                    font-size: 15vmin;
-                    font-weight: 800;
-                "
-            >
-                ${game2.Sleepiness > 2 ? "The human is still asleep." : game2.Sleepiness > 1 ? "The human is waking up." : "The human is almost awake."}
-            </div>
+            ${game2.Sleepiness > 2 ? "The human is still asleep." : game2.Sleepiness > 1 ? "The human is waking up." : "The human is almost awake."}
         </div>
     `;
   }
@@ -32811,34 +32801,29 @@
             style="
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
+                font-size: 15vmin;
+                font-weight: 800;
                 text-transform: uppercase;
                 color: white;
             "
         >
-            <div
+            You win! The human is awake.
+            <button
+                onclick="$(${1 /* GameTitle */})"
                 style="
-                    font-size: 15vmin;
+                    font-size: 5vmin;
                     font-weight: 800;
+                    text-transform: uppercase;
+                    color: white;
+                    background: none;
+                    padding: 1vmin 3vmin;
+                    vertical-align: 4vmin;
+                    border: 2vmin solid white;
+                    border-radius: 50px;
                 "
             >
-                You win! The human is awake.
-                <button
-                    onclick="$(${1 /* GameTitle */})"
-                    style="
-                        font-size: 5vmin;
-                        font-weight: 800;
-                        text-transform: uppercase;
-                        color: white;
-                        background: none;
-                        padding: 1vmin 3vmin;
-                        vertical-align: 4vmin;
-                        border: 2vmin solid white;
-                        border-radius: 50px;
-                    "
-                >
-                    Play again
-                </button>
-            </div>
+                Play again
+            </button>
         </div>
     `;
   }
@@ -32848,34 +32833,29 @@
             style="
                 padding: 1vmin;
                 font-family: Helvetica, Arial, sans-serif;
+                font-size: 15vmin;
+                font-weight: 800;
                 text-transform: uppercase;
                 color: white;
             "
         >
-            <div
+            You lose! The human goes back to sleep.
+            <button
+                onclick="$(${1 /* GameTitle */})"
                 style="
-                    font-size: 15vmin;
+                    font-size: 5vmin;
                     font-weight: 800;
+                    text-transform: uppercase;
+                    color: white;
+                    background: none;
+                    padding: 1vmin 3vmin;
+                    vertical-align: 4vmin;
+                    border: 2vmin solid white;
+                    border-radius: 50px;
                 "
             >
-                You lose! The human goes back to sleep.
-                <button
-                    onclick="$(${1 /* GameTitle */})"
-                    style="
-                        font-size: 5vmin;
-                        font-weight: 800;
-                        text-transform: uppercase;
-                        color: white;
-                        background: none;
-                        padding: 1vmin 3vmin;
-                        vertical-align: 4vmin;
-                        border: 2vmin solid white;
-                        border-radius: 50px;
-                    "
-                >
-                    Try again
-                </button>
-            </div>
+                Try again
+            </button>
         </div>
     `;
   }
@@ -33037,8 +33017,8 @@
       mimic(first_named(game2.World, "title camera anchor")),
       audio_source(false),
       children([
-        transform([0, 0.1, -1], [0, 1, 0, 0]),
-        camera_canvas(perspective(1, 0.1, 1e3), [170 / 255, 199 / 255, 172 / 255, 1])
+        transform([0, 0.1, -1.2], [0, 1, 0, 0]),
+        camera_canvas(perspective(1, 0.1, 100), [170 / 255, 199 / 255, 172 / 255, 1])
       ], [
         task_when(() => game2.PlayState === "playing", (entity) => {
           mimic(first_named(game2.World, "player camera anchor"))(game2, camera);
@@ -33209,7 +33189,7 @@
     return [
       children([
         transform([0, 0, 10]),
-        camera_target(game2.Targets.Sun, orthographic(8, 3, 15)),
+        camera_target(game2.Targets.Sun, orthographic(7, 3, 15)),
         light_directional([1, 1, 1], 0.3)
       ])
     ];
@@ -33286,7 +33266,7 @@
     return [
       children([
         transform(),
-        shake(5),
+        shake(4),
         spawn(blueprint_hand, 2),
         disable(1048576 /* Spawn */),
         task_when(() => game2.PlayState === "playing", (entity) => {
@@ -33444,7 +33424,7 @@
       ], [
         named("lose camera anchor"),
         transform([0, 30, 50], from_euler([0, 0, 0, 1], 30, -155, 0))
-      ], [named("hand spawner anchor"), transform([0, 50, 30]), ...blueprint_spawner(game2)])
+      ], [named("hand spawner anchor"), transform([0, 100, 30]), ...blueprint_spawner(game2)])
     ];
   }
 
@@ -34069,7 +34049,7 @@
     instantiate(game2, [...blueprint_camera_follow(game2), transform([0, 10, 0])]);
     instantiate(game2, [
       ...blueprint_sun(game2),
-      transform(void 0, from_euler([0, 0, 0, 0], -45, 45, 0))
+      transform(void 0, from_euler([0, 0, 0, 0], -75, 30, 0))
     ]);
     instantiate(game2, [
       transform([0, 15, 0]),
@@ -34109,11 +34089,15 @@
       }
       case 3 /* CollectItem */: {
         let [item_entity, other_entity] = payload;
+        if (game2.World.Signature[item_entity] === 0 /* None */) {
+          break;
+        }
         let other_collide = game2.World.Collide[other_entity];
         if (other_collide.Layers & 1 /* Player */) {
           game2.Sleepiness--;
           if (game2.Sleepiness <= 0) {
             game2.PlayState = "win";
+            other_collide.Layers &= ~1 /* Player */;
           }
         }
         destroy_all(game2.World, item_entity);
@@ -34124,6 +34108,7 @@
         let other_collide = game2.World.Collide[other_entity];
         if (other_collide.Layers & 1 /* Player */) {
           game2.PlayState = "lose";
+          other_collide.Layers &= ~1 /* Player */;
         } else {
           let hand_collide = game2.World.Collide[hand_entity];
           hand_collide.Mask &= ~1 /* Player */;
