@@ -33593,7 +33593,7 @@ render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCylinder, [
 cull(131072 /* Render */)
 ]);
 instantiate(game2, [
-transform([-3.8, 1.1, 0.3], void 0, [1.8, 1.73, -0.44]),
+transform([-3.8, 1.1, 0.3], void 0, [1.8, 1.73, 0.44]),
 collide(false, 4 /* Obstacle */, 0 /* None */),
 rigid_body(0 /* Static */),
 render_colored_shadows(game2.MaterialColoredShadows, game2.MeshCube, [
@@ -34083,6 +34083,7 @@ break;
 }
 case 2 /* GameStart */: {
 game2.PlayState = "playing";
+game2.Sleepiness = 3;
 break;
 }
 case 3 /* CollectItem */: {
