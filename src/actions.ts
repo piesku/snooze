@@ -29,6 +29,7 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
         }
         case Action.GameStart: {
             game.PlayState = "playing";
+            game.Sleepiness = 3;
             //play_synth_clip(game.Audio, undefined, snd_alarm);
             break;
         }
