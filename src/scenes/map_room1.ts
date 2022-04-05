@@ -185,7 +185,7 @@ export function map_room1(game: Game) {
     ]);
 
     instantiate(game, [
-        transform([-3.8, 1.1, 0.3], undefined, [1.8, 1.73, -0.44]),
+        transform([-3.8, 1.1, 0.3], undefined, [1.8, 1.73, 0.44]),
         collide(false, Layer.Obstacle, Layer.None),
         rigid_body(RigidKind.Static),
         render_colored_shadows(game.MaterialColoredShadows, game.MeshCube, [
