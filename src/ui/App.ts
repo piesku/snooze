@@ -63,7 +63,7 @@ export function Overlay(game: Game) {
             "
         >
             ${game.Sleepiness > 2
-                ? "The human is still asleep."
+                ? "The human is asleep."
                 : game.Sleepiness > 1
                 ? "The human is waking up."
                 : "The human is almost awake."}
