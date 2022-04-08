@@ -1,5 +1,7 @@
+import {instantiate} from "../common/game.js";
 import {Entity} from "../common/world.js";
 import {destroy_all} from "./components/com_children.js";
+import {task_timeout} from "./components/com_task.js";
 import {Game, Layer} from "./game.js";
 import {scene_room} from "./scenes/sce_room.js";
 import {Has} from "./world.js";
@@ -55,13 +57,21 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
         case Action.Snooze: {
             let [hand_entity, other_entity] = payload as [Entity, Entity];
             let other_collide = game.World.Collide[other_entity];
+
+            game.World.Signature[hand_entity] &= ~Has.Trigger;
+
             if (other_collide.Layers & Layer.Player) {
                 game.PlayState = "lose";
                 other_collide.Layers &= ~Layer.Player;
-            } else {
-                let hand_collide = game.World.Collide[hand_entity];
-                hand_collide.Mask &= ~Layer.Player;
             }
+
+            let camera_entity = game.Cameras[0];
+            game.World.Signature[camera_entity] |= Has.Shake;
+            instantiate(game, [
+                task_timeout(0.2, () => {
+                    game.World.Signature[camera_entity] &= ~Has.Shake;
+                }),
+            ]);
             break;
         }
     }
