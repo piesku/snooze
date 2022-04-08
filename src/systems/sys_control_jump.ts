@@ -16,9 +16,9 @@ export function sys_control_jump(game: Game, delta: number) {
     }
 }
 
-const jump_magnitude = 180;
+const jump_magnitude = 160;
 const local_direction_title: Vec3 = [0, 1, 0];
-const local_direction_playing: Vec3 = [0, 1, 0.2];
+const local_direction_playing: Vec3 = [0, 1, 0.3];
 const world_direction: Vec3 = [0, 0, 0];
 
 function update(game: Game, entity: Entity) {
