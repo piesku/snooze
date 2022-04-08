@@ -134,7 +134,8 @@ export interface RenderColoredShadows {
 export function render_colored_shadows(
     material: Material<ColoredUnlitLayout & ShadowMappingLayout>,
     mesh: Mesh,
-    diffuse_color: Vec4
+    diffuse_color: Vec4,
+    front_face = GL_CW
 ) {
     return (game: Game, entity: Entity) => {
         game.World.Signature[entity] |= Has.Render;
@@ -143,7 +144,7 @@ export function render_colored_shadows(
             Material: material,
             Mesh: mesh,
             Phase: diffuse_color[3] < 1 ? RenderPhase.Transparent : RenderPhase.Opaque,
-            FrontFace: GL_CW,
+            FrontFace: front_face,
             DiffuseColor: diffuse_color,
         };
     };

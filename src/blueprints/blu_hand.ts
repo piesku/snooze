@@ -1,3 +1,5 @@
+import {element} from "../../common/random.js";
+import {GL_CCW, GL_CW} from "../../common/webgl.js";
 import {Action} from "../actions.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
@@ -9,6 +11,7 @@ import {trigger} from "../components/com_trigger.js";
 import {Game, Layer} from "../game.js";
 
 export function blueprint_hand(game: Game) {
+    let side = element([-1, 1]);
     return [
         collide(
             true,
@@ -20,13 +23,13 @@ export function blueprint_hand(game: Game) {
         rigid_body(RigidKind.Dynamic, 0.3),
         lifespan(10),
         children([
-            transform(undefined, undefined, [5, 5, 5]),
-            render_colored_shadows(game.MaterialColoredShadows, game.MeshHand, [
-                242 / 0xff,
-                194 / 0xff,
-                61 / 0xff,
-                1,
-            ]),
+            transform(undefined, undefined, [5 * side, 5, 5]),
+            render_colored_shadows(
+                game.MaterialColoredShadows,
+                game.MeshHand,
+                [242 / 0xff, 194 / 0xff, 61 / 0xff, 1],
+                side > 0 ? GL_CW : GL_CCW
+            ),
         ]),
     ];
 }
