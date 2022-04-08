@@ -58,8 +58,6 @@ export function dispatch(game: Game, action: Action, payload: unknown) {
             let [hand_entity, other_entity] = payload as [Entity, Entity];
             let other_collide = game.World.Collide[other_entity];
 
-            game.World.Signature[hand_entity] &= ~Has.Trigger;
-
             if (other_collide.Layers & Layer.Player) {
                 game.PlayState = "lose";
                 other_collide.Layers &= ~Layer.Player;

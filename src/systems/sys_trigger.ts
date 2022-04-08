@@ -25,6 +25,10 @@ function update(game: Game, entity: Entity) {
         let other_collide = game.World.Collide[collision.Other];
         if (trigger.Mask & other_collide.Layers) {
             dispatch(game, trigger.Action, [entity, collision.Other]);
+            if (trigger.Once) {
+                game.World.Signature[entity] &= ~Has.Trigger;
+                break;
+            }
         }
     }
 }

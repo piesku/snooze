@@ -19,7 +19,7 @@ export function blueprint_hand(game: Game) {
             Layer.Ground | Layer.Obstacle | Layer.Player,
             [0.4, 0.2, 0.6]
         ),
-        trigger(Layer.Ground | Layer.Player | Layer.Obstacle, Action.Snooze),
+        trigger(Layer.Ground | Layer.Player | Layer.Obstacle, Action.Snooze, true),
         rigid_body(RigidKind.Dynamic, 0.3),
         lifespan(10),
         children([
