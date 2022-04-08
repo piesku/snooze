@@ -1,5 +1,6 @@
 import {get_pitch, multiply} from "../../common/quat.js";
 import {Entity} from "../../common/world.js";
+import {Action, dispatch} from "../actions.js";
 import {Game} from "../game.js";
 import {Has} from "../world.js";
 
@@ -9,6 +10,18 @@ export function sys_control_keyboard(game: Game, delta: number) {
     for (let i = 0; i < game.World.Signature.length; i++) {
         if ((game.World.Signature[i] & QUERY) === QUERY) {
             update(game, i);
+        }
+    }
+
+    if (game.InputDelta["Enter"] === -1) {
+        switch (game.PlayState) {
+            case "title":
+                dispatch(game, Action.GameStart, null);
+                break;
+            case "win":
+            case "lose":
+                dispatch(game, Action.GameTitle, null);
+                break;
         }
     }
 }
