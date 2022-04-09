@@ -10,6 +10,7 @@ import {control_always} from "../components/com_control_always.js";
 import {control_player} from "../components/com_control_player.js";
 import {disable} from "../components/com_disable.js";
 import {move} from "../components/com_move.js";
+import {multiple} from "../components/com_multiple.js";
 import {named} from "../components/com_named.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
@@ -22,6 +23,7 @@ import {blueprint_spawner} from "./blu_spawner.js";
 export function blueprint_player(game: Game) {
     let player: Entity;
     return [
+        named("player"),
         callback((game, entity) => (player = entity)),
         control_player(true, 0.2, 0),
         control_always([0, 0, 1], null, "move"),
@@ -30,7 +32,7 @@ export function blueprint_player(game: Game) {
         collide(true, Layer.Player, Layer.Ground | Layer.Obstacle, [2.8, 2.6, 2]),
         rigid_body(RigidKind.Dynamic),
         audio_source(false),
-        children(
+        multiple(
             [
                 task_when(
                     () => game.PlayState === "playing",
@@ -62,7 +64,9 @@ export function blueprint_player(game: Game) {
                         control_always.Animation = undefined;
                     }
                 ),
-            ],
+            ]
+        ),
+        children(
             // Body.
             [
                 transform(),

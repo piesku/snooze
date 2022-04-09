@@ -4,6 +4,7 @@ import {Action} from "../actions.js";
 import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
 import {lifespan} from "../components/com_lifespan.js";
+import {named} from "../components/com_named.js";
 import {render_colored_shadows} from "../components/com_render.js";
 import {RigidKind, rigid_body} from "../components/com_rigid_body.js";
 import {transform} from "../components/com_transform.js";
@@ -13,6 +14,7 @@ import {Game, Layer} from "../game.js";
 export function blueprint_hand(game: Game) {
     let side = element([-1, 1]);
     return [
+        named("hand"),
         collide(
             true,
             Layer.Obstacle,

@@ -8,6 +8,7 @@ import {children} from "../components/com_children.js";
 import {collide} from "../components/com_collide.js";
 import {control_always} from "../components/com_control_always.js";
 import {move} from "../components/com_move.js";
+import {named} from "../components/com_named.js";
 import {shake} from "../components/com_shake.js";
 import {spawn} from "../components/com_spawn.js";
 import {transform} from "../components/com_transform.js";
@@ -33,6 +34,7 @@ export function scene_room(game: Game) {
 
     // Note spawner.
     instantiate(game, [
+        named("note spawner"),
         transform([0, 15, 0]),
         control_always(null, [0, 1, 0, 0]),
         move(0, 1),
