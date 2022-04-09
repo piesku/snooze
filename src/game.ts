@@ -12,8 +12,6 @@ import {mesh_hand} from "../meshes/hand.js";
 import {mesh_note} from "../meshes/note.js";
 import {mesh_wheel} from "../meshes/wheel.js";
 import {sys_animate} from "./systems/sys_animate.js";
-import {sys_audio_listener} from "./systems/sys_audio_listener.js";
-import {sys_audio_source} from "./systems/sys_audio_source.js";
 import {sys_camera} from "./systems/sys_camera.js";
 import {sys_collide} from "./systems/sys_collide.js";
 import {sys_control_always} from "./systems/sys_control_always.js";
@@ -22,11 +20,9 @@ import {sys_control_keyboard} from "./systems/sys_control_keyboard.js";
 import {sys_control_touch_move} from "./systems/sys_control_touch_move.js";
 import {sys_cull} from "./systems/sys_cull.js";
 import {sys_debug} from "./systems/sys_debug.js";
-import {sys_draw} from "./systems/sys_draw.js";
 import {sys_lifespan} from "./systems/sys_lifespan.js";
 import {sys_mimic} from "./systems/sys_mimic.js";
 import {sys_move} from "./systems/sys_move.js";
-import {sys_particles} from "./systems/sys_particles.js";
 import {sys_physics_integrate} from "./systems/sys_physics_integrate.js";
 import {sys_physics_kinematic} from "./systems/sys_physics_kinematic.js";
 import {sys_physics_resolve} from "./systems/sys_physics_resolve.js";
@@ -108,19 +104,17 @@ export class Game extends Game3D {
         sys_shake(this, delta);
         sys_toggle(this, delta);
         sys_spawn(this, delta);
-        false && sys_particles(this, delta);
-        sys_transform(this, delta);
 
         if (false) {
             sys_debug(this, delta);
         }
 
+        // Commit.
+        sys_transform(this, delta);
+
         // Rendering.
-        false && sys_audio_listener(this, delta);
-        false && sys_audio_source(this, delta);
         sys_render_depth(this, delta);
         sys_render_forward(this, delta);
-        false && sys_draw(this, delta);
         sys_ui(this, delta);
     }
 }
