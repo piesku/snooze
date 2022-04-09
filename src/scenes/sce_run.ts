@@ -4,7 +4,7 @@ import {blueprint_camera_follow} from "../blueprints/blu_camera_follow.js";
 import {blueprint_ground} from "../blueprints/blu_ground.js";
 import {blueprint_player} from "../blueprints/blu_player.js";
 import {blueprint_sun} from "../blueprints/blu_sun.js";
-import {child} from "../components/com_children.js";
+import {children} from "../components/com_children.js";
 import {transform} from "../components/com_transform.js";
 import {Game} from "../game.js";
 import {World} from "../world.js";
@@ -17,7 +17,7 @@ export function scene_run(game: Game) {
     instantiate(game, [
         ...blueprint_player(game),
         transform([0, 1, 0], [0, 1, 0, 0]),
-        child([
+        children([
             // Directional light and the shadow source.
             ...blueprint_sun(game),
             transform(undefined, from_euler([0, 0, 0, 0], -45, 45, 0)),
